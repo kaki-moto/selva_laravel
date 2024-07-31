@@ -7,12 +7,17 @@ use App\Models\Member; // Memberモデルを使用する場合
 
 class MemberRegistController extends Controller
 {
-    public function showRegistrationForm()
+    public function showTop()
     {
-        return view('member_regist');
+        return view('members.top');
     }
 
-    public function confirm(Request $request)
+    public function showForm()
+    {
+        return view('members.member_regist');
+    }
+
+    public function showConfirm(Request $request)
     {
         $validatedData = $request->validate([
             'family' => 'required|max:20',
@@ -23,10 +28,10 @@ class MemberRegistController extends Controller
             'email' => 'required|max:200|email|unique:members,email',
         ]);
 
-        return view('sent', compact('validatedData'));
+        return view('members.sent', compact('validatedData'));
     }
 
-    public function register(Request $request)
+    public function showComplete(Request $request)
     {
         $validatedData = $request->validate([
             'family' => 'required|max:20',
@@ -40,6 +45,10 @@ class MemberRegistController extends Controller
         // ここでバリデーション済みのデータを使って会員登録処理を行う
         // Member::create($validatedData);
 
-        return view('regist_comp')->with('success', '会員登録が完了しました');
+        return view('members.regist_comp')->with('success', '会員登録が完了しました');
     }
+
+    
+
+
 }

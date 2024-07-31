@@ -7,23 +7,13 @@
 </head>
 <body>
     <div>
-        @if (Route::has('login'))
-            <div class="top-right links">
-                @auth
-                    <a href="{{ url('/home') }}">Home</a>
-                @else
-                    <a href="{{ route('login') }}">Login</a>
-                    @if (Route::has('register'))
-                        <a href="{{ route('register') }}">Register</a>
-                    @endif
-                @endauth
-            </div>
-        @endif
+        <a href="{{ route('top') }}">トップに戻る</a>
+    </div>
 
         <div class="content">
             <h3>会員情報登録</h3>
             
-            <form action="{{ route('member.register') }}" method="POST">
+            <form action="{{ route('confirm') }}" method="POST">
                 @csrf
 
                 <label>
