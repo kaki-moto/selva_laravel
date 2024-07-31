@@ -6,77 +6,66 @@
     <title>会員情報登録画面</title>
 </head>
 <body>
-    <div>
-        <a href="{{ route('top') }}">トップに戻る</a>
-    </div>
+    <h3>会員情報登録</h3>
+    
+    <form action="{{ route('form') }}" method="post">
+        @csrf
 
-        <div class="content">
-            <h3>会員情報登録</h3>
-            
-            <form action="{{ route('confirm') }}" method="POST">
-                @csrf
+        <label>
+            氏名
+            <label>
+                姓
+                <!-- old('') は、フォームの送信に失敗した場合に、以前入力された値を保持するための Laravel のヘルパー関数-->
+                <input type="text" name="family" value="{{ old('family') }}">
+            </label>
+            <label>
+                名
+                <input type="text" name="first" value="{{ old('first') }}">
+            </label>
+        </label>
+        @error('family')<p style="color: red;">{{ $message }}</p>@enderror
+        @error('first')<p style="color: red;">{{ $message }}</p>@enderror
 
-                <label>
-                    氏名
-                    <label>
-                        姓
-                        <!--`old('family')` は、フォームの送信に失敗した場合に、以前入力された値を保持するための Laravel のヘルパー関数-->
-                        <input type="text" name="family" value="{{ old('family') }}">
-                    </label>
-                    <label>
-                        名
-                        <input type="text" name="first" value="{{ old('first') }}">
-                    </label>
-                </label>
-                @error('family')<p style="color: red;">{{ $message }}</p>@enderror
-                @error('first')<p style="color: red;">{{ $message }}</p>@enderror
+        <br>
 
-                <br>
+        <label>
+            ニックネーム
+            <input type="text" name="nickname" value="{{ old('nickname') }}">
+        </label>
+        @error('nickname')<p style="color: red;">{{ $message }}</p>@enderror
 
-                <label>
-                    ニックネーム
-                    <input type="text" name="nickname" value="{{ old('nickname') }}">
-                </label>
-                @error('nickname')<p style="color: red;">{{ $message }}</p>@enderror
+        <label>
+            性別
+            <input type="radio" name="gender" value="男性" {{ old('gender') === '男性' ? 'checked' : '' }}>男性
+            <input type="radio" name="gender" value="女性" {{ old('gender') === '女性' ? 'checked' : '' }}>女性
+        </label>
+        @error('gender')<p style="color: red;">{{ $message }}</p>@enderror
 
-                <label>
-                    性別
-                    <input type="radio" name="gender" value="男性" {{ old('gender') === '男性' ? 'checked' : '' }}>男性
-                    <input type="radio" name="gender" value="女性" {{ old('gender') === '女性' ? 'checked' : '' }}>女性
-                </label>
-                @error('gender')<p style="color: red;">{{ $message }}</p>@enderror
+        <br>
 
-                <br>
+        <label>
+            パスワード
+            <input type="password" name="password">
+        </label>
+        @error('password')<p style="color: red;">{{ $message }}</p>@enderror
 
-                <label>
-                    パスワード
-                    <input type="password" name="password">
-                </label>
-                @error('password')<p style="color: red;">{{ $message }}</p>@enderror
+        <br>
 
-                <br>
+        <label>
+            パスワードの確認
+            <input type="password" name="password_confirmation">
+        </label>
+        @error('password_confirmation')<p style="color: red;">{{ $message }}</p>@enderror
 
-                <label>
-                    パスワードの確認
-                    <input type="password" name="password_confirmation">
-                </label>
-                @error('password_confirmation')<p style="color: red;">{{ $message }}</p>@enderror
+        <br>
 
-                <br>
-
-                <label>
-                    メールアドレス
-                    <input type="email" name="email" value="{{ old('email') }}">
-                </label>
-                @error('email')<p style="color: red;">{{ $message }}</p>@enderror
-                
-                <p><input type="submit" value="確認画面へ"></p>
-            </form>
-
-            <form action="{{ route('top') }}" method="GET">
-                <input type="submit" value="トップに戻る">
-            </form>
-        </div>
-    </div>
+        <label>
+            メールアドレス
+            <input type="email" name="email" value="{{ old('email') }}">
+        </label>
+        @error('email')<p style="color: red;">{{ $message }}</p>@enderror
+        
+        <p><input type="submit" value="確認画面へ"></p>
+    </form>
 </body>
 </html>

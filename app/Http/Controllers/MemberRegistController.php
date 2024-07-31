@@ -33,14 +33,25 @@ class MemberRegistController extends Controller
 
     public function showComplete(Request $request)
     {
-        $validatedData = $request->validate([
+         // showConfirm メソッドでバリデーションされたデータを再度バリデーションする
+         $validatedData = $request->validate([
             'family' => 'required|max:20',
             'first' => 'required|max:20',
             'nickname' => 'required|max:10',
             'gender' => 'required|in:男性,女性',
-            'password' => 'required|min:8|max:20',
+            'password' => 'required|min:8|max:20|confirmed',
             'email' => 'required|max:200|email|unique:members,email',
         ]);
+
+        // データベースに会員情報を保存する
+        $member = new Member();
+        $member->family = $validatedData['family'];
+        $member->first = $validatedData['first'];
+        $member->nickname = $validatedData['nickname'];
+        $member->gender = $validatedData['gender'];
+        $member->password = bcrypt($validatedData['password']);
+        $member->email = $validatedData['email'];
+        $member->save();
 
         // ここでバリデーション済みのデータを使って会員登録処理を行う
         // Member::create($validatedData);
