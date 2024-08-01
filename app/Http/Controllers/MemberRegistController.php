@@ -32,7 +32,13 @@ class MemberRegistController extends Controller
             'first' => 'required|max:20',
             'nickname' => 'required|max:10',
             'gender' => 'required|in:1,2', //value値に1, 2以外を入れるとエラーに
-            'password' => 'required|min:8|max:20|confirmed',
+            'password' => [
+                            'required',
+                            'min:8',
+                            'max:20',
+                            'confirmed',
+                            'regex:/^[a-zA-Z0-9]+$/'  // 半角英数字のみを許可
+                        ],
             'email' => 'required|max:200|email|unique:members,email',
         ]);
 
