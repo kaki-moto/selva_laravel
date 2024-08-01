@@ -13,41 +13,45 @@
 
         <label>
             氏名
-            {{ old('family') }}
-            {{ old('first') }}
+            {{ $validatedData['family'] }}{{ $validatedData['first'] }}
         </label>
 
         <br>
 
         <label>
             ニックネーム
-            {{ old('nickname') }}
+            {{ $validatedData['nickname'] }}
         </label>
+
+        <br>
 
         <label>
             性別
-            {{ old('gender') === '男性' ? 'checked' : '' }}
-            {{ old('gender') === '女性' ? 'checked' : '' }}
+            {{ $validatedData['gender'] === '1' ? '男性' : '' }}
+            {{ $validatedData['gender'] === '2' ? '女性' : '' }}
         </label>
 
         <br>
 
         <label>
             パスワード
-            {{ old('nickname') }}
+            セキュリティのため非表示
         </label>
 
         <br>
 
         <label>
             メールアドレス
-            {{ old('email') }}
+            {{ $validatedData['email'] }}
         </label>
         
         <p><input type="submit" value="登録完了"></p>
     </form>
 
-    <button onclick="history.back()">前に戻る</button>
+    <form action="{{ route('form') }}" method="GET">
+    @csrf
+    <button type="submit">前に戻る</button>
+    </form>
 
 </body>
 </html>

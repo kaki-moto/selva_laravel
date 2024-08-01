@@ -8,7 +8,7 @@
 <body>
     <h3>会員情報登録</h3>
     
-    <form action="{{ route('form') }}" method="post">
+    <form action="{{ route('confirm') }}" method="post">
         @csrf
 
         <label>
@@ -16,11 +16,12 @@
             <label>
                 姓
                 <!-- old('') は、フォームの送信に失敗した場合に、以前入力された値を保持するための Laravel のヘルパー関数-->
-                <input type="text" name="family" value="{{ old('family') }}">
+                <!-- 優先順位：以前のリクエストからの 'family' の値があればそれを使用（`old('family')`）、それがない場合`$registrationData['family']` の値を使用、どちらもない場合は空文字列を使用 -->
+                <input type="text" name="family" value="{{ old('family', $registrationData['family'] ?? '') }}">
             </label>
             <label>
                 名
-                <input type="text" name="first" value="{{ old('first') }}">
+                <input type="text" name="first" value="{{ old('first', $registrationData['first'] ?? '') }}">
             </label>
         </label>
         @error('family')<p style="color: red;">{{ $message }}</p>@enderror
@@ -30,14 +31,17 @@
 
         <label>
             ニックネーム
-            <input type="text" name="nickname" value="{{ old('nickname') }}">
+            <input type="text" name="nickname" value="{{ old('nickname', $registrationData['nickname'] ?? '') }}">
         </label>
         @error('nickname')<p style="color: red;">{{ $message }}</p>@enderror
 
+        <br>
+        
         <label>
             性別
-            <input type="radio" name="gender" value="男性" {{ old('gender') === '男性' ? 'checked' : '' }}>男性
-            <input type="radio" name="gender" value="女性" {{ old('gender') === '女性' ? 'checked' : '' }}>女性
+            <!-- バリュー値を男性1、女性2に。それ以外を入れるとエラーに -->
+            <input type="radio" name="gender" value=1 {{ (old('gender', $registrationData['gender'] ?? '') === '1') ? 'checked' : '' }}>男性
+            <input type="radio" name="gender" value=2 {{ (old('gender', $registrationData['gender'] ?? '') === '2') ? 'checked' : '' }}>女性
         </label>
         @error('gender')<p style="color: red;">{{ $message }}</p>@enderror
 
@@ -61,7 +65,7 @@
 
         <label>
             メールアドレス
-            <input type="email" name="email" value="{{ old('email') }}">
+            <input type="email" name="email" value="{{ old('email', $registrationData['email'] ?? '') }}">
         </label>
         @error('email')<p style="color: red;">{{ $message }}</p>@enderror
         
