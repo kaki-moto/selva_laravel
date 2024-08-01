@@ -8,7 +8,7 @@
 <body>
     <h3>会員情報確認画面</h3>
 
-    <form action="{{ route('complete') }}" method="POST">
+    <form action="{{ route('complete') }}" method="POST" id="registrationForm">
         @csrf
 
         <label>
@@ -45,13 +45,20 @@
             {{ $validatedData['email'] }}
         </label>
         
-        <p><input type="submit" value="登録完了"></p>
+        <input type="hidden" name="form_token" value="{{ $token }}">
+        <p><input type="submit" id="submitButton" value="登録完了"></p>
     </form>
+
 
     <form action="{{ route('form') }}" method="GET">
     @csrf
     <button type="submit">前に戻る</button>
     </form>
 
+    <script>
+   document.getElementById('registrationForm').addEventListener('submit', function() {
+       document.getElementById('submitButton').disabled = true;
+   });
+   </script>
 </body>
 </html>

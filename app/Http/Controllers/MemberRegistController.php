@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Member; // Memberモデルを使用する場合
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str; //二重送信防止
 
 class MemberRegistController extends Controller
 {
@@ -48,14 +49,25 @@ class MemberRegistController extends Controller
         // $validatedDataをセッションにregistration_dataというキーで保存する。session('registration_data')でバリデーションOKのデータを呼び出せる。
         $request->session()->put('registration_data', $validatedData);
 
+        //二重送信防止
+        $token = Str::random(40);
+        $request->session()->put('form_token', $token);
+
         //エラーなければ遷移。エラーあれば自動的に元のフォームにリダイレクト、エラーメッセージをセッションに保存、入力された値をセッションに一時保存・フォームに再表示
-        return view('members.sent', compact('validatedData')); //{{ $validatedData['family'] }}のようにビューで表示できる
+        return view('members.sent', compact('validatedData', 'token')); //{{ $validatedData['family'] }}のようにビューで表示できる
     }
 
 
     //postで、完了画面へが押されたら
     public function showComplete(Request $request)
     {
+        //トークン検証
+        $token = $request->input('form_token');
+        if ($token !== session('form_token')) {
+        return redirect()->route('form')->with('error', '不正な操作が検出されました。もう一度やり直してください。');
+        }
+        session()->forget('form_token');
+
 
         $registrationData = session('registration_data');
         \Log::info('Registration data: ' . json_encode($registrationData)); // デバッグ用
@@ -67,13 +79,8 @@ class MemberRegistController extends Controller
         // データベースに会員情報を保存する（会員登録処理）
         try {
             $member = Member::create($registrationData);
-            \Log::info('Member created: ' . $member->id); // デバッグ用
-            
             // セッションのクリア
-            $request->session()->forget('registration_data'); //成功時にログにメンバーIDを記録
-
-            \Log::info('Member created successfully. ID: ' . $member->id);
-    
+            $request->session()->forget('registration_data');    
             return view('members.regist_comp')->with('success', '会員登録が完了しました');
 
         } catch (\Exception $e) {
