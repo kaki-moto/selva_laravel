@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Member; // Memberモデルを使用する場合
+use App\Member; // Memberモデルを使用する場合
 use Illuminate\Support\Facades\Hash;
 
 class MemberRegistController extends Controller
@@ -28,8 +28,8 @@ class MemberRegistController extends Controller
     {
         //エラーなければ$validatedDataに格納される
         $validatedData = $request->validate([
-            'family' => 'required|max:20',
-            'first' => 'required|max:20',
+            'name_mei' => 'required|max:20',
+            'name_sei' => 'required|max:20',
             'nickname' => 'required|max:10',
             'gender' => 'required|in:1,2', //value値に1, 2以外を入れるとエラーに
             'password' => [
@@ -58,26 +58,29 @@ class MemberRegistController extends Controller
     {
 
         $registrationData = session('registration_data');
+        \Log::info('Registration data: ' . json_encode($registrationData)); // デバッグ用
+
         if (!$registrationData) {
             return redirect()->route('form')->with('error', '登録情報が見つかりません。再度登録をお願いします。');
         }
 
         // データベースに会員情報を保存する（会員登録処理）
-        $member = new Member();
-        $member->family = $registrationData['family'];
-        $member->first = $registrationData['first'];
-        $member->nickname = $registrationData['nickname'];
-        $member->gender = $registrationData['gender'];
-        $member->password = $registrationData['password']; //ハッシュ化済
-        $member->email = $registrationData['email'];
-        $member->save();
-        
+        try {
+            $member = Member::create($registrationData);
+            \Log::info('Member created: ' . $member->id); // デバッグ用
+            
+            // セッションのクリア
+            $request->session()->forget('registration_data'); //成功時にログにメンバーIDを記録
 
-        // セッションのクリア
-        $request->session()->forget('registration_data');
+            \Log::info('Member created successfully. ID: ' . $member->id);
+    
+            return view('members.regist_comp')->with('success', '会員登録が完了しました');
 
-        // Member::create($validatedData);
-
-        return view('members.regist_comp')->with('success', '会員登録が完了しました');
+        } catch (\Exception $e) {
+            // エラーログを出力
+            \Log::error('会員登録エラー: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString()); // スタックトレースを追加
+            return redirect()->route('form')->with('error', '会員登録に失敗しました。もう一度お試しください。エラー: '. $e->getMessage());
+        }
     }
 }

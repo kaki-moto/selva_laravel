@@ -9,8 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 class Member extends Model
 {
     protected $fillable = [
-        'family', 'first', 'nickname', 'gender', 'password', 'email'
-    ];
+        'name_sei', 'name_mei', 'nickname', 'gender', 'password', 'email'
+    ]; //カラム名
 
     protected $hidden = [
         'password',

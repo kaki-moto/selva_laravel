@@ -16,8 +16,8 @@ return [
     'regex' => ':attributeは半角英数字のみ使用できます。',
     
     'attributes' => [
-        'family' => '姓',
-        'first' => '名',
+        'name_sei' => '姓',
+        'name_mei' => '名',
         'nickname' => 'ニックネーム',
         'gender' => '性別',
         'password' => 'パスワード',

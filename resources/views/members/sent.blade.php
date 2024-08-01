@@ -13,7 +13,7 @@
 
         <label>
             氏名
-            {{ $validatedData['family'] }}{{ $validatedData['first'] }}
+            {{ $validatedData['name_sei'] }}{{ $validatedData['name_mei'] }}
         </label>
 
         <br>

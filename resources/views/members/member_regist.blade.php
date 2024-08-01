@@ -1,3 +1,11 @@
+
+
+@if(session('error'))
+    <div style="color: red;">
+        {{ session('error') }}
+    </div>
+@endif
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -16,16 +24,16 @@
             <label>
                 姓
                 <!-- old('') は、フォームの送信に失敗した場合に、以前入力された値を保持するための Laravel のヘルパー関数-->
-                <!-- 優先順位：以前のリクエストからの 'family' の値があればそれを使用（`old('family')`）、それがない場合`$registrationData['family']` の値を使用、どちらもない場合は空文字列を使用 -->
-                <input type="text" name="family" value="{{ old('family', $registrationData['family'] ?? '') }}">
+                <!-- 優先順位：以前のリクエストからの 'name_sei' の値があればそれを使用（`old('name_sei')`）、それがない場合`$registrationData['name_sei']` の値を使用、どちらもない場合は空文字列を使用 -->
+                <input type="text" name="name_sei" value="{{ old('name_sei', $registrationData['name_sei'] ?? '') }}">
             </label>
             <label>
                 名
-                <input type="text" name="first" value="{{ old('first', $registrationData['first'] ?? '') }}">
+                <input type="text" name="name_mei" value="{{ old('name_mei', $registrationData['name_mei'] ?? '') }}">
             </label>
         </label>
-        @error('family')<p style="color: red;">{{ $message }}</p>@enderror
-        @error('first')<p style="color: red;">{{ $message }}</p>@enderror
+        @error('name_sei')<p style="color: red;">{{ $message }}</p>@enderror
+        @error('name_mei')<p style="color: red;">{{ $message }}</p>@enderror
 
         <br>
 
