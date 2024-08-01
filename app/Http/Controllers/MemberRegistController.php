@@ -43,7 +43,7 @@ class MemberRegistController extends Controller
         ]);
 
         // パスワードをハッシュ化（セッションに保存する前にハッシュ化しなくてはならない）
-        $validatedData['password'] = Hash::make($validatedData['password']);
+        $validatedData['password'] = bcrypt($validatedData['password']);
 
         // $validatedDataをセッションにregistration_dataというキーで保存する。session('registration_data')でバリデーションOKのデータを呼び出せる。
         $request->session()->put('registration_data', $validatedData);
