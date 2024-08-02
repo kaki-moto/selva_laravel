@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Member; // Memberモデルを使用する場合
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str; //二重送信防止
+use Illuminate\Support\Facades\Mail; //登録完了メール
+use App\Mail\RegistMail; //登録完了メールのためにRegistMailクラスを使う。
 
 class MemberRegistController extends Controller
 {
@@ -70,7 +72,7 @@ class MemberRegistController extends Controller
 
 
         $registrationData = session('registration_data');
-        \Log::info('Registration data: ' . json_encode($registrationData)); // デバッグ用
+        //\Log::info('Registration data: ' . json_encode($registrationData)); // デバッグ用
 
         if (!$registrationData) {
             return redirect()->route('form')->with('error', '登録情報が見つかりません。再度登録をお願いします。');
@@ -79,8 +81,13 @@ class MemberRegistController extends Controller
         // データベースに会員情報を保存する（会員登録処理）
         try {
             $member = Member::create($registrationData);
-            // セッションのクリア
+
+             // 登録完了メール送信
+            Mail::to($member->email)->send(new RegistMail($member));
+
+            // セッションのクリア。DBにデータを挿入したためもうセッションは必要ない。
             $request->session()->forget('registration_data');    
+
             return view('members.regist_comp')->with('success', '会員登録が完了しました');
 
         } catch (\Exception $e) {
