@@ -38,7 +38,7 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'members', //membersテーブルだから
         ],
 
         'api' => [
@@ -66,9 +66,9 @@ return [
     */
 
     'providers' => [
-        'users' => [
+        'members' => [ //ここもmembersに
             'driver' => 'eloquent',
-            'model' => App\User::class,
+            'model' => App\Member::class, //モデルをMemberモデルに
         ],
 
         // 'users' => [

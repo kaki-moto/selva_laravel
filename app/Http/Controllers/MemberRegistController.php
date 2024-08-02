@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str; //二重送信防止
 use Illuminate\Support\Facades\Mail; //登録完了メール
 use App\Mail\RegistMail; //登録完了メールのためにRegistMailクラスを使う。
+use Illuminate\Support\Facades\Auth; // Authファサードのインポートを追加
 
 class MemberRegistController extends Controller
 {
@@ -15,7 +16,22 @@ class MemberRegistController extends Controller
     {
         return view('members.top');
     }
+    public function showLogin()
+    {
+        return view('members.login');
+    }
 
+    public function loginCheck(Request $request)
+    {
+        //ログイン処理、Auth::attempt()`を使用して認証
+       $credentials = $request->only('email', 'password');
+       if (Auth::attempt($credentials)) {
+           // 認証成功でリダイレクト。新しいビューを返すこととリダイレクトは違う
+           return redirect()->route('top');
+       }
+       // 認証失敗
+       return back()->withErrors(['email' => 'メールアドレスまたはパスワードが間違っています。']);
+   }
 
     public function showForm()
     {

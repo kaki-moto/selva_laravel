@@ -79,5 +79,10 @@
         
         <p><input type="submit" value="確認画面へ"></p>
     </form>
+
+    <form action="{{ route('top') }}" method="GET">
+    <button type="submit">トップへ戻る</button>
+    </form>
+    
 </body>
 </html>
