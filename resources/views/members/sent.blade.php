@@ -27,8 +27,9 @@
 
         <label>
             性別
-            {{ $validatedData['gender'] === '1' ? '男性' : '' }}
-            {{ $validatedData['gender'] === '2' ? '女性' : '' }}
+            {{ config('master.gender.' . $validatedData['gender'], '不明')}}
+            <!--{{ $validatedData['gender'] === '1' ? '男性' : '' }}-->
+            <!--{{ $validatedData['gender'] === '2' ? '女性' : '' }}-->
         </label>
 
         <br>
