@@ -11,6 +11,7 @@ use Illuminate\Notifications\Notifiable;
 //class Member extends Model
 class Member extends Authenticatable //DBのmembersテーブルからのデータを表現している。
 {
+
     protected $fillable = [
         'name_sei', 'name_mei', 'nickname', 'gender', 'password', 'email'
     ]; //カラム名

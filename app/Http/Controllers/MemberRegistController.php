@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str; //二重送信防止
 use Illuminate\Support\Facades\Mail; //登録完了メール
 use App\Mail\RegistMail; //登録完了メールのためにRegistMailクラスを使う。
-use Illuminate\Support\Facades\Auth; // Authファサードのインポートを追加
+use Illuminate\Support\Facades\Auth; // Authファサードのインポートを追加、ログイン？ログアウトの時使う
 use Illuminate\Support\Facades\Validator; //Validatorクラスを使用するためインポート
 
 class MemberRegistController extends Controller
@@ -141,6 +141,16 @@ class MemberRegistController extends Controller
 
     public function onlyShowComplete(Request $request){
         return view('members.regist_comp');
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/')->with('status', 'ログアウトしました。');
     }
 
 }

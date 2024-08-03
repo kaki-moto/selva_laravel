@@ -21,4 +21,4 @@ Route::post('/complete', 'MemberRegistController@showComplete')->name('complete'
 //regist_compを表示させるだけ
 Route::get('/registration/complete', 'MemberRegistController@onlyShowComplete')->name('regist_comp');
 
-
+Route::get('/logout', 'MemberRegistController@logout')->name('logout');
