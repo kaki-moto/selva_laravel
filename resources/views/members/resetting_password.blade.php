@@ -8,27 +8,35 @@
 <body>
 
     <!--パスワードリセットする処理を実行-->
-    <form action="{{ route('') }}" method="post">
+    <form action="{{ route('reset') }}" method="post">
     @csrf
-        <label>
-            パスワード
-            <input type="text" name="password">
-        </label>
+    <input type="hidden" name="token" value="{{ $token }}"><!--隠しフィールド？-->
 
-        <!--エラーが表示される様に-->
-
-        <br>
-        
         <label>
             パスワード
             <input type="password" name="password">
         </label>
 
         <!--エラーが表示される様に-->
+        @error('password')
+        <div style="color: red;">{{ $message }}</div>
+        @enderror
+
+        <br>
+        
+        <label>
+            パスワード確認
+            <input type="password" name="password_confirmation" id="password_confirmation">
+        </label>
+
+        <!--エラーが表示される様に-->
+        @error('password_confirmation')
+        <div style="color: red;">{{ $message }}</div>
+        @enderror
 
         <br>
 
-        <input type="password" value="パスワードリセット">
+        <input type="submit" value="パスワードリセット">
     </form>
 
     <form action="{{ route('top') }}" method="GET">

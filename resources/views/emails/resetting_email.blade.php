@@ -9,6 +9,7 @@
     <p>パスワード再発行</p>
     <p>以下のURLをクリックしてパスワードを再発行してください。</p>
     <!--再設定画面に飛ぶURL-->
-    https://ik1-132-72570.vs.sakura.ne.jp/reset
+    <a href="{{ $resetUrl }}">{{ $resetUrl }}</a>
+    
 </body>
 </html>

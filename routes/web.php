@@ -25,9 +25,12 @@ Route::get('/logout', 'MemberRegistController@logout')->name('logout');
 // パスワードの再設定画面で「送信する」ボタンを押したら、バリデーションしてメールを送信
 Route::post('/passwordResetting', 'MemberRegistController@sendResettingMail')->name('passRestting');
 
-// パスワードの再設定画面（passeord.blade.php）を表示するだけ
+// パスワードの再設定用のメールを送る画面（passeord.blade.php）を表示するだけ
 Route::get('/password', 'MemberRegistController@showPassword')->name('password');
-
+// 上記を送り終えた後の完了画面を表示するだけ
 Route::get('/emailComp', 'MemberRegistController@showMailComp')->name('mail_comp');
 
-Route::get('/reset', 'MemberRegistController@showReset')->name('reset');
+// パスワードのリセット画面（mail_comp.blade.php）表示するだけ
+Route::get('/reset/{token}', 'MemberRegistController@showReset')->name('showReset');
+// リセットするボタン押したら、リセットしてエラーなけれな再設定完了まで
+Route::post('/reset', 'MemberRegistController@reset')->name('reset');

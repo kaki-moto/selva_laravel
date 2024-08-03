@@ -11,6 +11,7 @@ use App\Mail\RegistMail; //登録完了メールのためにRegistMailクラス�
 use Illuminate\Support\Facades\Auth; // Authファサードのインポートを追加、ログイン？ログアウトの時、再設定の時使う
 use Illuminate\Support\Facades\Validator; //Validatorクラスを使用するためインポート
 use App\Mail\ResettingMail;
+use Illuminate\Support\Facades\DB;
 
 class MemberRegistController extends Controller
 {
@@ -161,6 +162,9 @@ class MemberRegistController extends Controller
 
     public function sendResettingMail(Request $request)
     {
+        // $memberを定義
+        $member = Member::where('email', $request->email)->first();
+
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|exists:members,email', //exists:members,emailは入力されたメールアドレスがDBのmebersテーブルのemailカラムに存在するかチェック
         ], [
@@ -176,12 +180,21 @@ class MemberRegistController extends Controller
             ->withInput(); //ユーザーが入力した値をセッションに保存し、フォームに再表示
         }
 
-        // $memberを定義
-        $member = Member::where('email', $request->email)->first();
-    
+        // ユニークなトークンを生成
+        $token = Str::random(60);
+        // トークンと有効期限をデータベースに保存
+        DB::table('password_resets')->insert([
+        'email' => $member->email,
+        'token' => $token,
+        'created_at' => now()
+        ]);
+
+        // トークンを含むURLを生成
+        $resetUrl = route('showReset', ['token' => $token]);
+
         // パスワード再設定用メールを送信
         Mail::to($member->email) //メールの送信先：DBから取得したユーザーのメールアドレス
-        ->send(new ResettingMail($member)); //send()はメールを送信するメソッド。ResettingMailクラスの新しいインスタンスを作成。このクラスは、送信するメールの内容とフォーマットを定義。$memberオブジェクトをコンストラクタに渡している。これにより、メールの内容にユーザー情報を含めることができる。
+        ->send(new ResettingMail($member, $resetUrl)); //send()はメールを送信するメソッド。ResettingMailクラスの新しいインスタンスを作成。このクラスは、送信するメールの内容とフォーマットを定義。$memberオブジェクトをコンストラクタに渡している。これにより、メールの内容にユーザー情報を含めることができる。
 
         return redirect()->route('mail_comp')->with('status', 'パスワード再設定メールを送信しました。');
     }
@@ -194,6 +207,48 @@ class MemberRegistController extends Controller
     //パスワードのリセットページを表示するだけ
     public function showReset(Request $request)
     {
-        return view('members.resetting_password');
+        $token = $request->token;
+        return view('members.resetting_password', compact('token'));
     }
+
+    //パスワードのリセットをする
+    public function reset(Request $request)
+    {
+        //入力されたパスワードのバリデーション
+        $request->validate([
+            'token' => 'required',
+            'password' => [
+                            'required',
+                            'min:8',
+                            'max:20',
+                            'confirmed',
+                            'regex:/^[a-zA-Z0-9]+$/'
+                        ],
+        ]);
+    
+        // トークンを使ってリセット要求を検索
+        $passwordReset = DB::table('password_resets')
+            ->where('token', $request->token)
+            ->first();
+
+        if (!$passwordReset) {
+            return back()->withErrors(['email' => '無効なトークンまたはメールアドレスです。']);
+        }
+    
+        // メールアドレスをもとにユーザーを特定し、パスワードを更新
+        $user = Member::where('email', $passwordReset->email)->first();
+        if (!$user) {
+            return back()->withErrors(['email' => '無効なユーザーです。']);
+        }
+
+        $user->password = Hash::make($request->password); // パスワードをハッシュ化
+        $user->save();
+
+            // パスワードリセット要求を削除
+        DB::table('password_resets')->where('email', $passwordReset->email)->delete();
+
+        //成功したらtopへ
+        return redirect()->route('top');
+    }
+
 }

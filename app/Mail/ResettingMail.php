@@ -13,6 +13,7 @@ class ResettingMail extends Mailable
     use Queueable, SerializesModels;
 
     public $member;
+    public $resetUrl;
 
     /**
      * Create a new message instance.
@@ -21,9 +22,10 @@ class ResettingMail extends Mailable
      * @return void
      */
 
-    public function __construct($member)
+    public function __construct($member, $resetUrl)
     {
         $this->member = $member;
+        $this->resetUrl = $resetUrl;
     }
 
     /**
