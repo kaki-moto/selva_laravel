@@ -23,7 +23,7 @@
             <input type="password" name="password">
         </label>
         @error('password')<p style="color: red;">{{ $message }}</p>@enderror
-        <p><a href="">パスワードを忘れた方はこちら</a></p>
+        <p><a href=" {{ route('password') }} ">パスワードを忘れた方はこちら</a></p>
 
         @if ($errors->has('login'))
         <p style="color: red;">{{ $errors->first('login') }}</p>

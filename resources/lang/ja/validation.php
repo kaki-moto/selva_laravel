@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'required' => ':attributeは必須項目です。',
+    'required' => ':attributeを入力してください。',
     'max' => [
         'string' => ':attributeは:max文字以内で入力してください。',
     ],

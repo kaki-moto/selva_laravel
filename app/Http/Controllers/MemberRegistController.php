@@ -8,8 +8,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str; //二重送信防止
 use Illuminate\Support\Facades\Mail; //登録完了メール
 use App\Mail\RegistMail; //登録完了メールのためにRegistMailクラスを使う。
-use Illuminate\Support\Facades\Auth; // Authファサードのインポートを追加、ログイン？ログアウトの時使う
+use Illuminate\Support\Facades\Auth; // Authファサードのインポートを追加、ログイン？ログアウトの時、再設定の時使う
 use Illuminate\Support\Facades\Validator; //Validatorクラスを使用するためインポート
+use App\Mail\ResettingMail;
 
 class MemberRegistController extends Controller
 {
@@ -153,4 +154,46 @@ class MemberRegistController extends Controller
         return redirect('/')->with('status', 'ログアウトしました。');
     }
 
+    public function showPassword(Request $request)
+    {
+        return view('members.password');
+    }
+
+    public function sendResettingMail(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:members,email', //exists:members,emailは入力されたメールアドレスがDBのmebersテーブルのemailカラムに存在するかチェック
+        ], [
+            'email.required' => 'メールアドレスを入力してください。', // ここでのemailはpassword.blade.phpのinputタグのname属性
+            'email.email' => '有効なメールアドレスを入力してください。',
+            'email.exists' => '登録されていないメールアドレスです。',
+        ]);
+        
+        //バリデーションエラーがあったら
+        if ($validator->fails()) {
+            return back() //ユーザーを入力フォームへ戻す。
+            ->withErrors($validator) //エラーメッセージをセッションに追加
+            ->withInput(); //ユーザーが入力した値をセッションに保存し、フォームに再表示
+        }
+
+        // $memberを定義
+        $member = Member::where('email', $request->email)->first();
+    
+        // パスワード再設定用メールを送信
+        Mail::to($member->email) //メールの送信先：DBから取得したユーザーのメールアドレス
+        ->send(new ResettingMail($member)); //send()はメールを送信するメソッド。ResettingMailクラスの新しいインスタンスを作成。このクラスは、送信するメールの内容とフォーマットを定義。$memberオブジェクトをコンストラクタに渡している。これにより、メールの内容にユーザー情報を含めることができる。
+
+        return redirect()->route('mail_comp')->with('status', 'パスワード再設定メールを送信しました。');
+    }
+
+    public function showMailComp(Request $request)
+    {
+        return view('members.mail_comp');
+    }
+
+    //パスワードのリセットページを表示するだけ
+    public function showReset(Request $request)
+    {
+        return view('members.resetting_password');
+    }
 }
