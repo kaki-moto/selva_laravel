@@ -7,10 +7,18 @@
 </head>
 <body>
     <header>
+        @auth
+        <!--Member.phpで定義-->
+        <p>ようこそ {{ Auth::user()->full_name }} 様</p>
+        <a href="#">ログアウト</a>
+        @endauth
+
+        @guest
         <a href="{{ route('form') }}">新規会員登録</a>
         <a href="{{ route('login') }}">ログイン</a>
+        @endguest
+
     </header>
 
-    
 </body>
 </html>

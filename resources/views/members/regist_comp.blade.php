@@ -7,7 +7,11 @@
 </head>
 <body>
     <h3>会員登録完了</h3>
-    <p>会員登録が完了しました</p>
+
+    <!--会員登録完了した時に「会員登録が完了しました」と表示-->
+    @if (session('success'))
+            {{ session('success') }}
+    @endif
 
     <form action="{{ route('top') }}" method="GET">
     <button type="submit">トップへ戻る</button>

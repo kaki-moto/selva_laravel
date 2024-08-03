@@ -18,5 +18,7 @@ Route::post('/confirm', 'MemberRegistController@showConfirm')->name('confirm');
 //sentで登録完了を押したら
 Route::post('/complete', 'MemberRegistController@showComplete')->name('complete');
 
+//regist_compを表示させるだけ
+Route::get('/registration/complete', 'MemberRegistController@onlyShowComplete')->name('regist_comp');
 
 

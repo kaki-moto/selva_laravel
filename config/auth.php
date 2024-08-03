@@ -65,6 +65,8 @@ return [
     |
     */
 
+    //認証に使用するモデルを指定。デフォルトはUserモデル（User.php）。
+    //この指定によりAuth::user()はMemberモデルのインスタンスを返す。ビューで{{ Auth::user()->name }}と書くとログインしているユーザー（今回はMember）のname属性が表示される。
     'providers' => [
         'members' => [ //ここもmembersに
             'driver' => 'eloquent',

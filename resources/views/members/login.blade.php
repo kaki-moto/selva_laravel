@@ -11,8 +11,8 @@
     <form action="{{ route('loginCheck') }}" method="POST">
         @csrf
         <label>
-            メールアドレス
-            <input type="email" name="email" value="{{ old('email', $registrationData['email'] ?? '') }}">
+            メールアドレス（ID）
+            <input type="email" name="email" value="{{ old('email') }}">
         </label>
         @error('email')<p style="color: red;">{{ $message }}</p>@enderror
 
@@ -22,8 +22,12 @@
             パスワード
             <input type="password" name="password">
         </label>
-        <p><a href="">パスワードを忘れた方はこちら</a></p>
         @error('password')<p style="color: red;">{{ $message }}</p>@enderror
+        <p><a href="">パスワードを忘れた方はこちら</a></p>
+
+        @if ($errors->has('login'))
+        <p style="color: red;">{{ $errors->first('login') }}</p>
+        @endif
 
         <button type="submit">ログイン</button>
     </form>

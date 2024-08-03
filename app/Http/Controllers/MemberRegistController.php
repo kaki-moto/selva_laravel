@@ -9,13 +9,16 @@ use Illuminate\Support\Str; //二重送信防止
 use Illuminate\Support\Facades\Mail; //登録完了メール
 use App\Mail\RegistMail; //登録完了メールのためにRegistMailクラスを使う。
 use Illuminate\Support\Facades\Auth; // Authファサードのインポートを追加
+use Illuminate\Support\Facades\Validator; //Validatorクラスを使用するためインポート
 
 class MemberRegistController extends Controller
 {
     public function showTop()
     {
-        return view('members.top');
+        $user = Auth::user();
+        return view('members.top', compact('user'));
     }
+
     public function showLogin()
     {
         return view('members.login');
@@ -23,14 +26,34 @@ class MemberRegistController extends Controller
 
     public function loginCheck(Request $request)
     {
-        //ログイン処理、Auth::attempt()`を使用して認証
+        //ログイン時のバリデーション
+        $validator = Validator::make($request->all(), [
+            'email' => 'required',
+            'password' => 'required',
+        ], [
+            'email.required' => 'IDが入力されていません。',
+            'password.required' => 'パスワードが入力されていません。',
+        ]);
+
+        if ($validator->fails()) {
+            return back()
+            ->withErrors($validator)
+            ->withInput(['email' => $request->email]);
+        }
+
+        //バリデーションエラーなければ、$requestオブジェクトからemailとpasswordのみ取り出し、$credentialsに格納。
        $credentials = $request->only('email', 'password');
+        //ログイン処理、Auth::attempt()`を使用して認証
        if (Auth::attempt($credentials)) {
+            //認証が成功した後にユーザー情報をセッションに保存
+            $request->session()->put('user', Auth::user());
            // 認証成功でリダイレクト。新しいビューを返すこととリダイレクトは違う
            return redirect()->route('top');
        }
-       // 認証失敗
-       return back()->withErrors(['email' => 'メールアドレスまたはパスワードが間違っています。']);
+       // 認証失敗でback()メソッドを使用してユーザーを前のページ（ログインフォーム）に戻す。
+       return back()
+       ->withErrors(['login' => 'IDまたはパスワードが間違っています。']) //withErrors()を使用してエラーメッセージをセッションに追加。
+       ->withInput(['email' => $request->email]);
    }
 
     public function showForm()
@@ -104,7 +127,8 @@ class MemberRegistController extends Controller
             // セッションのクリア。DBにデータを挿入したためもうセッションは必要ない。
             $request->session()->forget('registration_data');    
 
-            return view('members.regist_comp')->with('success', '会員登録が完了しました');
+            //return view('members.regist_comp')->with('success', '会員登録が完了しました'); //view()メソッドにwith()メソッドを直接チェーンすることはできない
+            return redirect()->route('regist_comp')->with('success', '会員登録が完了しました');
 
         } catch (\Exception $e) {
             // エラーログを出力
@@ -113,4 +137,10 @@ class MemberRegistController extends Controller
             return redirect()->route('form')->with('error', '会員登録に失敗しました。もう一度お試しください。エラー: '. $e->getMessage());
         }
     }
+
+
+    public function onlyShowComplete(Request $request){
+        return view('members.regist_comp');
+    }
+
 }
