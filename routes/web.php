@@ -3,11 +3,9 @@
 Route::get('/', 'MemberRegistController@showTop')->name('top');
 
 Route::get('/login', 'MemberRegistController@showLogin')->name('login');
-
 Route::post('/login/top', 'MemberRegistController@loginCheck')->name('loginCheck');
 
 Route::get('/form', 'MemberRegistController@showForm')->name('form');
-
 //sentでの前に戻るボタン
 Route::get('/confirm/form', 'MemberRegistController@showForm')->name('backFrom');
 
@@ -16,7 +14,6 @@ Route::post('/confirm', 'MemberRegistController@showConfirm')->name('confirm');
 
 //sentで登録完了を押したら
 Route::post('/complete', 'MemberRegistController@showComplete')->name('complete');
-
 //regist_compを表示させるだけ
 Route::get('/registration/complete', 'MemberRegistController@onlyShowComplete')->name('regist_comp');
 
@@ -34,3 +31,11 @@ Route::get('/emailComp', 'MemberRegistController@showMailComp')->name('mail_comp
 Route::get('/reset/{token}', 'MemberRegistController@showReset')->name('showReset');
 // リセットするボタン押したら、リセットしてエラーなけれな再設定完了まで
 Route::post('/reset', 'MemberRegistController@reset')->name('reset');
+
+//
+Route::get('/product/regist', 'ProductRegistController@showRegist')->name('showRegist');
+Route::post('/product/confirm', 'ProductRegistController@showConfirm')->name('product_confirm');
+Route::post('/product/regist', 'ProductRegistController@productRegist')->name('product_regist');
+
+//カテゴリ
+Route::get('/get-subcategories', 'ProductRegistController@getSubcategories')->name('get-subcategories');
