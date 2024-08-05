@@ -21,12 +21,14 @@ return [
         'nickname' => 'ニックネーム',
         'gender' => '性別',
         'password' => 'パスワード',
+        'password_confirmation' => 'パスワードの確認',
         'email' => 'メールアドレス',
     ],
 
     'custom' => [
         'password' => [
             'regex' => 'パスワードは半角英数字のみ使用できます。',
+            'confirmed' => 'パスワードとパスワード確認が一致しません。',
         ],
     ],
 ];

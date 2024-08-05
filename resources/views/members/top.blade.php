@@ -10,6 +10,7 @@
         @auth
         <!--Member.phpで定義-->
         <p>ようこそ {{ Auth::user()->full_name }} 様</p>
+        <a href="{{ route('#') }}">新規商品登録</a>
         <a href="{{ route('logout') }}">ログアウト</a>
         @endauth
 

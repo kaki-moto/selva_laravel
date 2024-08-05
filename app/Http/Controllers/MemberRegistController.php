@@ -224,6 +224,7 @@ class MemberRegistController extends Controller
                             'confirmed',
                             'regex:/^[a-zA-Z0-9]+$/'
                         ],
+            'password_confirmation' => ['required', 'min:8', 'max:20', 'regex:/^[a-zA-Z0-9]+$/']
         ]);
     
         // トークンを使ってリセット要求を検索
