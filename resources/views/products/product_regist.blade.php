@@ -74,10 +74,31 @@
     <label>
         商品写真
         <!--画像をアップロードできるようにしたい-->
-        <input type="file" name="product_images[]" accept="image/jpg,image/jpeg,image/png,image/gif" multiple id="product-images" class="hidden">
-        <button type="button" id="upload-button">画像をアップロード</button>
+        <div>
+            写真1
+            <input type="file" name="product_image_1" accept="image/jpg,image/jpeg,image/png,image/gif" class="product-image hidden">
+            <button type="button" class="upload-button" data-target="1">アップロード</button>
+            <div id="image-preview-1" class="image-preview-container"></div>
+        </div>
+        <div>
+            写真2
+            <input type="file" name="product_image_2" accept="image/jpg,image/jpeg,image/png,image/gif" class="product-image hidden">
+            <button type="button" class="upload-button" data-target="2">アップロード</button>
+            <div id="image-preview-2" class="image-preview-container"></div>
+        </div>
+        <div>
+            写真3
+            <input type="file" name="product_image_3" accept="image/jpg,image/jpeg,image/png,gif" class="product-image hidden">
+            <button type="button" class="upload-button" data-target="3">アップロード</button>
+            <div id="image-preview-3" class="image-preview-container"></div>
+        </div>
+        <div>
+            写真4
+            <input type="file" name="product_image_4" accept="image/jpg,image/jpeg,image/png,gif" class="product-image hidden">
+            <button type="button" class="upload-button" data-target="4">アップロード</button>
+            <div id="image-preview-4" class="image-preview-container"></div>
+        </div>
     </label>
-    <div id="image-preview-container"></div>
     <div id="error-message" style="color: red;"></div>
 
     <br>
@@ -141,75 +162,62 @@ $(document).ready(function() {
         }
     });
 
-    //写真アップロードの処理
+
     // アップロードボタンをクリックしたら
-    $('#upload-button').click(function() {
-        $('#product-images').click();
+    $('.upload-button').click(function() {
+        var targetId = $(this).data('target');
+        $('input[name="product_image_' + targetId + '"]').click();
     });
 
+
     // 画像アップロードとプレビュー機能
-    $('#product-images').change(function(e) {
-        var files = e.target.files;
+    $('.product-image').change(function(e) {
+        var file = e.target.files[0];
         var formData = new FormData();
-        var totalSize = 0;
+        var previewContainerId = 'image-preview-' + $(this).attr('name').slice(-1);
 
-        // 既存の画像のサイズを計算
-        $('#image-preview-container img').each(function() {
-            totalSize += $(this).data('size') || 0;
-        });
+        $('#' + previewContainerId).empty();
+        $('#error-message').empty();
 
-         // ファイルごとの処理
-         for (var i = 0; i < files.length; i++) {
-        var file = files[i];
-        totalSize += file.size;
+        if (!file) return;
 
         // ファイルタイプとサイズのバリデーション
         if (!file.type.match('image/(jpg|jpeg|png|gif)')) {
-        $('#error-message').append('<p>エラー: ' + file.name + 'は許可されていないファイル形式です。</p>');
-        continue;
+            $('#error-message').append('<p>エラー: ' + file.name + 'は許可されていないファイル形式です。</p>');
+            return;
         }
 
         if (file.size > 10 * 1024 * 1024) {
-        $('#error-message').append('<p>エラー: ' + file.name + 'は10MBを超えています。</p>');
-        continue;
+            $('#error-message').append('<p>エラー: ' + file.name + 'は10MBを超えています。</p>');
+            return;
         }
 
-        formData.append('product_images[]', file);
+        formData.append('product_image', file);
 
         // 画像のプレビュー表示
-        // 画像のプレビュー表示
-        (function(file) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    var img = $('<img>')
-                        .addClass('image-preview')
-                        .attr('src', e.target.result)
-                        .css({'width': '200px', 'margin': '5px'})
-                        .data('size', file.size);
-                    $('#image-preview-container').append(img);
-                };
-                reader.readAsDataURL(file);
-            })(file);
-        }
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var img = $('<img>')
+                .addClass('image-preview')
+                .attr('src', e.target.result)
+                .css({'width': '200px', 'margin': '5px'});
+            $('#' + previewContainerId).append(img);
+        };
+        reader.readAsDataURL(file);
 
-        if (totalSize > 10 * 1024 * 1024) {
-        $('#error-message').append('<p>エラー: 全ファイルの合計サイズが10MBを超えています。</p>');
-        return;
-        }
-
-        // サーバーへのアップロード（必要な場合）
+        // サーバーへのアップロード
         $.ajax({
-            url: '{{ route("upload_images") }}', // サーバー側のアップロード処理のルート
+            url: '{{ route("upload_images") }}',
             type: 'POST',
             data: formData,
             contentType: false,
             processData: false,
             success: function(response) {
-                    if (response.success) {
-                        console.log('画像が正常にアップロードされました');
-                    } else {
-                        $('#error-message').append('<p>エラー: ' + response.message + '</p>');
-                    }
+                if (response.success) {
+                    console.log('画像が正常にアップロードされました');
+                } else {
+                    $('#error-message').append('<p>エラー: ' + response.message + '</p>');
+                }
             },
             error: function(xhr, status, error) {
                 $('#error-message').append('<p>エラー: アップロード中にエラーが発生しました。</p>');
