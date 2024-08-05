@@ -42,3 +42,5 @@ Route::post('/product/regist', 'ProductRegistController@productRegist')->name('p
 //カテゴリ
 Route::get('/get-subcategories', 'ProductRegistController@getSubcategories')->name('get-subcategories');
 
+Route::post('/upload-images', 'ProductRegistController@uploadImages')->name('upload_images');
+

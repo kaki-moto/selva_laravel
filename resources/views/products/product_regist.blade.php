@@ -5,11 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>商品登録フォーム</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
 <h3>商品登録</h3>
 
-<form action=" {{ route('product_confirm') }} " method="post">
+<form action=" {{ route('product_confirm') }} " method="post" enctype="multipart/form-data" id="product-form">
+    @csrf
     <label>
         商品名
         <input type="text">
@@ -59,7 +65,6 @@
             <option value="23">写真集</option>
             <option value="24">小説</option>
             <option value="25">ライフスタイル</option>
-
         </select>
 
     </label>
@@ -68,7 +73,12 @@
 
     <label>
         商品写真
+        <!--画像をアップロードできるようにしたい-->
+        <input type="file" name="product_images[]" accept="image/jpg,image/jpeg,image/png,image/gif" multiple id="product-images" class="hidden">
+        <button type="button" id="upload-button">画像をアップロード</button>
     </label>
+    <div id="image-preview-container"></div>
+    <div id="error-message" style="color: red;"></div>
 
     <br>
 
@@ -90,17 +100,20 @@
 
 <!--大カテゴリと小カテゴリを連動するための処理-->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
 $(document).ready(function() {
+    // CSRFトークンの設定
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
 
+    // 大カテゴリと小カテゴリの連動
     $('#main-category').change(function() {
         var mainCategoryId = $(this).val();
-        console.log('Selected main category:', mainCategoryId);  // 選択されたカテゴリのログ出力
+        console.log('Selected main category:', mainCategoryId);
 
         if(mainCategoryId) {
             $.ajax({
@@ -127,8 +140,83 @@ $(document).ready(function() {
             $('#sub-category').hide();
         }
     });
+
+    //写真アップロードの処理
+    // アップロードボタンをクリックしたら
+    $('#upload-button').click(function() {
+        $('#product-images').click();
+    });
+
+    // 画像アップロードとプレビュー機能
+    $('#product-images').change(function(e) {
+        var files = e.target.files;
+        var formData = new FormData();
+        var totalSize = 0;
+
+        // 既存の画像のサイズを計算
+        $('#image-preview-container img').each(function() {
+            totalSize += $(this).data('size') || 0;
+        });
+
+         // ファイルごとの処理
+         for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        totalSize += file.size;
+
+        // ファイルタイプとサイズのバリデーション
+        if (!file.type.match('image/(jpg|jpeg|png|gif)')) {
+        $('#error-message').append('<p>エラー: ' + file.name + 'は許可されていないファイル形式です。</p>');
+        continue;
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+        $('#error-message').append('<p>エラー: ' + file.name + 'は10MBを超えています。</p>');
+        continue;
+        }
+
+        formData.append('product_images[]', file);
+
+        // 画像のプレビュー表示
+        // 画像のプレビュー表示
+        (function(file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var img = $('<img>')
+                        .addClass('image-preview')
+                        .attr('src', e.target.result)
+                        .css({'width': '200px', 'margin': '5px'})
+                        .data('size', file.size);
+                    $('#image-preview-container').append(img);
+                };
+                reader.readAsDataURL(file);
+            })(file);
+        }
+
+        if (totalSize > 10 * 1024 * 1024) {
+        $('#error-message').append('<p>エラー: 全ファイルの合計サイズが10MBを超えています。</p>');
+        return;
+        }
+
+        // サーバーへのアップロード（必要な場合）
+        $.ajax({
+            url: '{{ route("upload_images") }}', // サーバー側のアップロード処理のルート
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                    if (response.success) {
+                        console.log('画像が正常にアップロードされました');
+                    } else {
+                        $('#error-message').append('<p>エラー: ' + response.message + '</p>');
+                    }
+            },
+            error: function(xhr, status, error) {
+                $('#error-message').append('<p>エラー: アップロード中にエラーが発生しました。</p>');
+            }
+        });
+    });
 });
 </script>
-
 </body>
 </html>

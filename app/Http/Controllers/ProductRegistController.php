@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Product; // 商品モデルを作成していることを前提としています
 
 class ProductRegistController extends Controller
 {
@@ -40,6 +43,30 @@ class ProductRegistController extends Controller
         
     }
 
+    public function uploadImages(Request $request)
+   {
+       $validator = Validator::make($request->all(), [
+           'product_images.*' => 'required|image|mimes:jpeg,png,gif|max:10240',
+       ]);
+
+       if ($validator->fails()) {
+           return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
+       }
+
+       $uploadedImages = [];
+
+       if ($request->hasFile('product_images')) {
+           foreach ($request->file('product_images') as $image) {
+               $path = $image->store('product_images', 'public');
+               $uploadedImages[] = [
+                   'url' => asset('storage/' . $path),
+                   'path' => $path
+               ];
+           }
+       }
+
+       return response()->json(['success' => true, 'images' => $uploadedImages]);
+   }
 
 
 
