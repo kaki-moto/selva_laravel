@@ -245,8 +245,11 @@ class MemberRegistController extends Controller
         $user->password = Hash::make($request->password); // パスワードをハッシュ化
         $user->save();
 
-            // パスワードリセット要求を削除
+        // パスワードリセット要求を削除
         DB::table('password_resets')->where('email', $passwordReset->email)->delete();
+
+        // ユーザーを自動的にログイン
+        Auth::login($user);
 
         //成功したらtopへ
         return redirect()->route('top');

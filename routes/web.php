@@ -34,8 +34,11 @@ Route::post('/reset', 'MemberRegistController@reset')->name('reset');
 
 //
 Route::get('/product/regist', 'ProductRegistController@showRegist')->name('showRegist');
+//確認画面へを押したら
 Route::post('/product/confirm', 'ProductRegistController@showConfirm')->name('product_confirm');
+//登録完了ボタンを押したら
 Route::post('/product/regist', 'ProductRegistController@productRegist')->name('product_regist');
 
 //カテゴリ
 Route::get('/get-subcategories', 'ProductRegistController@getSubcategories')->name('get-subcategories');
+

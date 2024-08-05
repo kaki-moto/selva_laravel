@@ -13,6 +13,7 @@ class ProductRegistController extends Controller
 
     public function showConfirm()
     {
+        // 確認画面にフォームの内容を表示させる。
         return view('products.regist_confirm');
     }
 
