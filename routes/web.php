@@ -44,3 +44,5 @@ Route::get('/get-subcategories', 'ProductRegistController@getSubcategories')->na
 
 Route::post('/upload-images', 'ProductRegistController@uploadImages')->name('upload_images');
 
+Route::get('/product/list', 'ProductRegistController@showList')->name('showList');
+

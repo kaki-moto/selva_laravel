@@ -235,6 +235,39 @@ class ProductRegistController extends Controller
         return $mainCategories[$mainCategoryId] . ' > ' . $subCategories[$subCategoryId];
     }
 
+    public function showList(Request $request)
+    {
+        //パラメータの取得。リクエストから大カテゴリ、小カテゴリ、検索キーワードを取取得。
+        $mainCategory = $request->input('main_category');
+        $subCategory = $request->input('sub_category');
+        $search = $request->input('search');
 
+        //商品を取得するためのクエリビルダーを初期化
+        $query = Product::with(['category', 'subcategory']);
 
+        //大カテゴリや小カテゴリが選択されている場合、それに基づいてクエリを絞り込む。
+        if ($mainCategory) {
+            $query->where('product_category_id', $mainCategory);
+        }
+
+        if ($subCategory) {
+            $query->where('product_subcategory_id', $subCategory);
+        }
+
+        //検索キーワードが入力されている場合、商品名か商品説明にそのキーワードが含まれる商品を検索。
+        if ($search) {
+            $query->where('name', 'like', "%{$search}%")
+                ->orWhere('product_content', 'like', "%{$search}%");
+        }
+
+        //構築されたクエリを実行し、結果を1ページあたり10件ずつページネーションして取得。
+        $products = $query->paginate(10);
+
+        // デバッグ用ログ出力
+        \Log::info('Products:', $products->toArray());
+
+        // 大カテゴリが選択されている場合、それに対応する小カテゴリのリストを取得。
+        $subCategories = $mainCategory ? $this->getSubcategoriesArray($mainCategory) : [];
+        return view('products.product_list', compact('products', 'mainCategory', 'subCategory', 'subCategories', 'search'));
+    }
 }
