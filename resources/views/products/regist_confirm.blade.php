@@ -8,6 +8,7 @@
 <body>
 <p>商品登録確認画面</p>
 <form action=" {{ route('product_regist') }} " method="post">
+    @csrf
 
     <label>
         商品名
@@ -26,10 +27,11 @@
     <label>
         商品写真
         @for ($i = 1; $i <= 4; $i++)
-            @if(isset($validatedData["product_image_{$i}"]))
+            @if(isset($validatedData["image_{$i}"]))
                 <div>
-                    写真{{ $i }}:
-                    <img src="{{ asset('storage/' . $validatedData["product_image_{$i}"]) }}" alt="商品画像{{ $i }}" style="width: 200px;">
+                    写真{{ $i }}
+                    <br>
+                    <img src="{{ asset('storage/' . $validatedData["image_{$i}"]) }}" alt="商品画像{{ $i }}" style="width: 200px;">
                 </div>
             @endif
         @endfor

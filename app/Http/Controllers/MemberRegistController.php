@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Member; // Memberモデルを使用する場合
+use App\Member; // Memberモデルのインポート
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str; //二重送信防止
 use Illuminate\Support\Facades\Mail; //登録完了メール
