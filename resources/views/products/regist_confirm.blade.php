@@ -7,7 +7,7 @@
 </head>
 <body>
 <p>商品登録確認画面</p>
-<form action=" {{ route('product_regist') }} " method="post">
+<form action=" {{ route('product_regist') }} " id="productRegist" method="post">
     @csrf
 
     <label>
@@ -46,7 +46,7 @@
     
     <br>
     
-    <input type="submit" value="商品を登録する">
+    <input type="submit" id="submitButton" value="商品を登録する">
 </form>
 
 <form action="{{ route('showRegist')}}" method="get">
@@ -54,6 +54,10 @@
 <button type="submit">前に戻る</button>
 </form>
 
-
+<script>
+document.getElementById('productRegist').addEventListener('submit', function() {
+    document.getElementById('submitButton').disabled = true;
+});
+</script>
 </body>
 </html>
