@@ -11,26 +11,47 @@
 
     <label>
         商品名
-        <input type="text">
+        {{ $validatedData['product_name'] }}
     </label>
+
+    <br>
 
     <label>
         商品カテゴリ
-        <select name="" id="">
-            <option value=""></option>
-        </select>
+        {{ $categoryName }}
     </label>
+
+    <br>
 
     <label>
         商品写真
+        @for ($i = 1; $i <= 4; $i++)
+            @if(isset($validatedData["product_image_{$i}"]))
+                <div>
+                    写真{{ $i }}:
+                    <img src="{{ asset('storage/' . $validatedData["product_image_{$i}"]) }}" alt="商品画像{{ $i }}" style="width: 200px;">
+                </div>
+            @endif
+        @endfor
     </label>
+
+    <br>
 
     <label>
         商品説明
+        {{ $validatedData['product_description'] }}
     </label>
+    
+    <br>
     
     <input type="submit" value="商品を登録する">
 </form>
+
+<form action="{{ route('showRegist')}}" method="get">
+@csrf
+<button type="submit">前に戻る</button>
+</form>
+
 
 </body>
 </html>

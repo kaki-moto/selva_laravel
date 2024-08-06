@@ -18,8 +18,11 @@
     @csrf
     <label>
         商品名
-        <input type="text">
+        <input type="text" name="product_name" value="{{ old('product_name', $validatedData['product_name'] ?? '') }}">
     </label>
+    @error('product_name')
+        <div style="color: red;">{{ $message }}</div>
+    @enderror
 
     <br>
 
@@ -29,75 +32,51 @@
         <select name="main_category" id="main-category">
             <!-- ここに大カテゴリのオプションを追加。Option要素のvalue属性は、そのオプションが選択されたときにフォームで送信される値を表す-->
             <option value="">選択してください</option>
-            <option value="1">インテリア</option>
-            <option value="2">家電</option>
-            <option value="3">ファッション</option>
-            <option value="4">美容</option>
-            <option value="5">本・雑誌</option>
+            <option value="1" {{ old('main_category') == '1' ? 'selected' : '' }}>インテリア</option>
+            <option value="2" {{ old('main_category') == '2' ? 'selected' : '' }}>家電</option>
+            <option value="3" {{ old('main_category') == '3' ? 'selected' : '' }}>ファッション</option>
+            <option value="4" {{ old('main_category') == '4' ? 'selected' : '' }}>美容</option>
+            <option value="5" {{ old('main_category') == '5' ? 'selected' : '' }}>本・雑誌</option>
         </select>
+        @error('main_category')
+        <div style="color: red;">{{ $message }}</div>
+        @enderror
 
         <!--小カテゴリ-->
-        <select name="sub_category" id="sub-category" style="display: none;"><!--デフォルトでは非表示に-->
+        <select name="sub_category" id="sub-category" style="{{ old('main_category') ? '' : 'display: none;' }}"><!--デフォルトでは非表示に-->
             <!-- ここに小カテゴリのオプションを追加 -->
             <option value="">選択してください</option>
-            <option value="1">収納家具</option>
-            <option value="2">寝具</option>
-            <option value="3">ソファ</option>
-            <option value="4">ベッド</option>
-            <option value="5">照明</option>
-            <option value="6">テレビ</option>
-            <option value="7">掃除機</option>
-            <option value="8">エアコン</option>
-            <option value="9">冷蔵庫</option>
-            <option value="10">レンジ</option>
-            <option value="11">トップス</option>
-            <option value="12">ボトム</option>
-            <option value="13">ワンピース</option>
-            <option value="14">ファッション小物</option>
-            <option value="15">ドレス</option>
-            <option value="16">ネイル</option>
-            <option value="17">アロマ</option>
-            <option value="18">スキンケア</option>
-            <option value="19">香水</option>
-            <option value="20">メイク</option>
-            <option value="21">旅行</option>
-            <option value="22">ホビー</option>
-            <option value="23">写真集</option>
-            <option value="24">小説</option>
-            <option value="25">ライフスタイル</option>
+            @foreach($subCategories as $key => $value)
+            <option value="{{ $key }}" {{ old('sub_category') == $key ? 'selected' : '' }}>{{ $value }}</option>
+            @endforeach
         </select>
-
     </label>
+    @error('sub_category')
+        <div style="color: red;">{{ $message }}</div>
+    @enderror
 
     <br>
+    <!---->
 
     <label>
         商品写真
-        <!--画像をアップロードできるようにしたい-->
+        @for ($i = 1; $i <= 4; $i++)
         <div>
-            写真1
-            <input type="file" name="product_image_1" accept="image/jpg,image/jpeg,image/png,image/gif" class="product-image hidden">
-            <button type="button" class="upload-button" data-target="1">アップロード</button>
-            <div id="image-preview-1" class="image-preview-container"></div>
+            写真{{ $i }}
+            <input type="file" name="product_image_{{ $i }}" accept="image/jpg,image/jpeg,image/png,image/gif" class="product-image hidden">
+            <button type="button" class="upload-button" data-target="{{ $i }}">アップロード</button>
+            <!--もしセッションやデータベースなどから既に登録されている商品画像があれば、その画像をプレビュー。asset()関数を使って画像のURLを生成、<img>要素で表示。<input type="hidden">`を使って、フォームデータとしても送信可能な形で既存画像のパスを隠しフィールドとして設定-->
+            <div id="image-preview-{{ $i }}" class="image-preview-container">
+                @if(isset($imageData["product_image_{$i}"]))
+                    <img src="{{ asset('storage/' . $imageData["product_image_{$i}"]) }}" alt="商品画像{{ $i }}" style="width: 200px;">
+                    <input type="hidden" name="existing_image_{{ $i }}" value="{{ $imageData["product_image_{$i}"] }}">
+                @endif
+            </div>
+            @error("product_image_{$i}")
+                <div style="color: red;">{{ $message }}</div>
+            @enderror
         </div>
-        <div>
-            写真2
-            <input type="file" name="product_image_2" accept="image/jpg,image/jpeg,image/png,image/gif" class="product-image hidden">
-            <button type="button" class="upload-button" data-target="2">アップロード</button>
-            <div id="image-preview-2" class="image-preview-container"></div>
-        </div>
-        <div>
-            写真3
-            <input type="file" name="product_image_3" accept="image/jpg,image/jpeg,image/png,gif" class="product-image hidden">
-            <button type="button" class="upload-button" data-target="3">アップロード</button>
-            <div id="image-preview-3" class="image-preview-container"></div>
-        </div>
-        <div>
-            写真4
-            <input type="file" name="product_image_4" accept="image/jpg,image/jpeg,image/png,gif" class="product-image hidden">
-            <button type="button" class="upload-button" data-target="4">アップロード</button>
-            <div id="image-preview-4" class="image-preview-container"></div>
-        </div>
+        @endfor
     </label>
     <div id="error-message" style="color: red;"></div>
 
@@ -105,7 +84,11 @@
 
     <label>
         商品説明
-        <textarea></textarea>
+        <textarea id="product-description" name="product_description">{{ old('product_description') }}</textarea>
+        <div id="description-error" style="color: red;"></div>
+        @error('product_description')
+            <div style="color: red;">{{ $message }}</div>
+        @enderror
     </label>
 
     <br>
@@ -131,44 +114,47 @@ $(document).ready(function() {
         }
     });
 
+    // 初期表示時に小カテゴリを設定
+    var initialMainCategory = $('#main-category').val();
+    if (initialMainCategory) {
+        $('#sub-category').show();
+    }
+
     // 大カテゴリと小カテゴリの連動
     $('#main-category').change(function() {
         var mainCategoryId = $(this).val();
-        console.log('Selected main category:', mainCategoryId);
-
         if(mainCategoryId) {
-            $.ajax({
-                url: '{{ route("get-subcategories") }}',
-                type: 'GET',
-                data: { main_category_id: mainCategoryId },
-                success: function(data) {
-                    console.log('Success:', data);
-                    $('#sub-category').empty();
-                    $('#sub-category').append('<option value="">選択してください</option>');
-                    $.each(data, function(key, value) {
-                        $('#sub-category').append('<option value="'+ key +'">'+ value +'</option>');
-                    });
-                    $('#sub-category').show();
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    console.log('Status:', status);
-                    console.log('Response:', xhr.responseText);
-                }
-            });
+            loadSubCategories(mainCategoryId);
         } else {
-            $('#sub-category').empty();
-            $('#sub-category').hide();
+            $('#sub-category').empty().hide();
         }
     });
 
+    function loadSubCategories(mainCategoryId) {
+        $.ajax({
+            url: '{{ route("get-subcategories") }}',
+            type: 'GET',
+            data: { main_category_id: mainCategoryId },
+            success: function(data) {
+                $('#sub-category').empty();
+                $('#sub-category').append('<option value="">選択してください</option>');
+                $.each(data, function(key, value) {
+                    var selected = (key == "{{ old('sub_category') }}") ? 'selected' : '';
+                    $('#sub-category').append('<option value="'+ key +'" '+ selected +'>'+ value +'</option>');
+                });
+                $('#sub-category').show();
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+            }
+        });
+    }
 
     // アップロードボタンをクリックしたら
     $('.upload-button').click(function() {
         var targetId = $(this).data('target');
         $('input[name="product_image_' + targetId + '"]').click();
     });
-
 
     // 画像アップロードとプレビュー機能
     $('.product-image').change(function(e) {
