@@ -37,7 +37,7 @@
         </select>
 
         <!--小カテゴリ-->
-        <select name="sub_category" id="sub-category" style="{{ $mainCategory ? '' : 'display: none;' }}">
+        <select name="sub_category" id="sub-category">
             <option value="">選択してください</option>
             @foreach($subCategories as $key => $value)
             <option value="{{ $key }}" {{ $subCategory == $key ? 'selected' : '' }}>{{ $value }}</option>
@@ -75,12 +75,7 @@
 
     </main>
 
-
-
-
-
-
-    <!--大カテゴリと小カテゴリを連動するための処理-->
+<!--大カテゴリと小カテゴリを連動するための処理-->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
@@ -95,7 +90,7 @@ $(document).ready(function() {
     // 初期表示時に小カテゴリを設定
     var initialMainCategory = $('#main-category').val();
     if (initialMainCategory) {
-        $('#sub-category').show();
+        loadSubCategories(initialMainCategory);
     }
 
     // 大カテゴリと小カテゴリの連動
@@ -104,7 +99,7 @@ $(document).ready(function() {
         if(mainCategoryId) {
             loadSubCategories(mainCategoryId);
         } else {
-            $('#sub-category').empty().hide();
+            $('#sub-category').empty().append('<option value="">選択してください</option>');
         }
     });
 
@@ -117,18 +112,15 @@ $(document).ready(function() {
                 $('#sub-category').empty();
                 $('#sub-category').append('<option value="">選択してください</option>');
                 $.each(data, function(key, value) {
-                    //var selected = (key == "{{ $validatedData['sub_category'] ?? '' }}") ? 'selected' : '';
-                    //$('#sub-category').append('<option value="'+ key +'" '+ selected +'>'+ value +'</option>');
                     $('#sub-category').append('<option value="'+ key +'">'+ value +'</option>');
                 });
-                $('#sub-category').show();
             },
             error: function(xhr, status, error) {
                 console.error('Error:', error);
             }
         });
     }
-}
+});
 </script>
 </body>
 </html>
