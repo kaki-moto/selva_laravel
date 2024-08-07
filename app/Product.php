@@ -21,4 +21,15 @@ class Product extends Model
     {
         return $this->belongsTo(ProductSubcategory::class, 'product_subcategory_id');
     }
+
+    public function getCategoryNameAttribute()
+    {
+        return $this->category ? $this->category->name : '不明なカテゴリ';
+    }
+
+    public function getSubcategoryNameAttribute()
+    {
+        return $this->subcategory ? $this->subcategory->name : '不明なサブカテゴリ';
+    }
+
 }

@@ -256,18 +256,24 @@ class ProductRegistController extends Controller
 
         //検索キーワードが入力されている場合、商品名か商品説明にそのキーワードが含まれる商品を検索。
         if ($search) {
-            $query->where('name', 'like', "%{$search}%")
-                ->orWhere('product_content', 'like', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('product_content', 'like', "%{$search}%");
+            });
         }
 
         //構築されたクエリを実行し、結果を1ページあたり10件ずつページネーションして取得。
         $products = $query->paginate(10);
 
         // デバッグ用ログ出力
-        \Log::info('Products:', $products->toArray());
+        foreach ($products as $product) {
+            \Log::info("Product ID: {$product->id}, Category: {$product->category_name}, Subcategory: {$product->subcategory_name}");
+        }
 
         // 大カテゴリが選択されている場合、それに対応する小カテゴリのリストを取得。
         $subCategories = $mainCategory ? $this->getSubcategoriesArray($mainCategory) : [];
         return view('products.product_list', compact('products', 'mainCategory', 'subCategory', 'subCategories', 'search'));
     }
+
+
 }

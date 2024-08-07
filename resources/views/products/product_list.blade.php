@@ -61,15 +61,13 @@
     <div>
         <img class="product-image" src="{{ asset('storage/' . $product->image_1) }}" alt="{{ $product->name }}">
         <p>
-            {{ $product->category ? $product->category->name : 'カテゴリなし' }} > 
-            {{ $product->subcategory ? $product->subcategory->name : 'サブカテゴリなし' }}
+            {{ $product->category_name }} > {{ $product->subcategory_name }}
         </p>
         <h4>{{ $product->name }}</h4>
     </div>
     @endforeach
 
     {{ $products->links() }}
-
 
         <form action="{{ route('top') }}" method="GET">
             <button type="submit">トップへ戻る</button>
