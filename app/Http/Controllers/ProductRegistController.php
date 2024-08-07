@@ -58,65 +58,29 @@ class ProductRegistController extends Controller
                     ],
                 'product_description' => 'required|max:500',
                 'image_1' => [
-                'nullable',
-                'image',
-                'mimes:jpeg,png,jpg,gif',
-                'max:10240',
-                function ($attribute, $value, $fail) {
-                    if ($value) {
-                        $extension = strtolower($value->getClientOriginalExtension());
-                        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
-                        if (!in_array($extension, $allowed)) {
-                            $fail('アップロードされたファイルは jpg, jpeg, png, gif 形式のみ許可されています。');
-                        }
-                    }
-                },
-                ],
+                        'nullable',
+                        'file',
+                        'mimes:jpeg,png,jpg,gif',
+                        'max:10240',
+                    ],
                 'image_2' => [
-                    'nullable',
-                    'image',
-                    'mimes:jpeg,png,jpg,gif',
-                    'max:10240',
-                    function ($attribute, $value, $fail) {
-                        if ($value) {
-                            $extension = strtolower($value->getClientOriginalExtension());
-                            $allowed = ['jpg', 'jpeg', 'png', 'gif'];
-                            if (!in_array($extension, $allowed)) {
-                                $fail('アップロードされたファイルは jpg, jpeg, png, gif 形式のみ許可されています。');
-                            }
-                        }
-                    },
-                ],
+                        'nullable',
+                        'file',
+                        'mimes:jpeg,png,jpg,gif',
+                        'max:10240',
+                    ],
                 'image_3' => [
-                    'nullable',
-                    'image',
-                    'mimes:jpeg,png,jpg,gif',
-                    'max:10240',
-                    function ($attribute, $value, $fail) {
-                        if ($value) {
-                            $extension = strtolower($value->getClientOriginalExtension());
-                            $allowed = ['jpg', 'jpeg', 'png', 'gif'];
-                            if (!in_array($extension, $allowed)) {
-                                $fail('アップロードされたファイルは jpg, jpeg, png, gif 形式のみ許可されています。');
-                            }
-                        }
-                    },
-                ],
+                        'nullable',
+                        'file',
+                        'mimes:jpeg,png,jpg,gif',
+                        'max:10240',
+                    ],
                 'image_4' => [
-                    'nullable',
-                    'image',
-                    'mimes:jpeg,png,jpg,gif',
-                    'max:10240',
-                    function ($attribute, $value, $fail) {
-                        if ($value) {
-                            $extension = strtolower($value->getClientOriginalExtension());
-                            $allowed = ['jpg', 'jpeg', 'png', 'gif'];
-                            if (!in_array($extension, $allowed)) {
-                                $fail('アップロードされたファイルは jpg, jpeg, png, gif 形式のみ許可されています。');
-                            }
-                        }
-                    },
-                ],
+                        'nullable',
+                        'file',
+                        'mimes:jpeg,png,jpg,gif',
+                        'max:10240',
+                    ],
             ], [
                 'product_name.required' => '商品名を入力してください。',
                 'product_name.max' => '商品名は100文字以内で入力してください。',
@@ -125,16 +89,16 @@ class ProductRegistController extends Controller
                 'main_category.in' => '無効な大カテゴリが選択されました。',
                 'product_description.required' => '商品説明を入力してください。',
                 'product_description.max' => '商品説明は500文字以内で入力してください。',
-                'image_1.image' => '写真1は画像ファイルを選択してください。',
+                'image_1.file' => '写真1は画像ファイルを選択してください。',
                 'image_1.mimes' => '写真1はjpeg, png, jpg, gif形式のファイルを選択してください。',
                 'image_1.max' => '写真1は10MB以下のファイルを選択してください。',
-                'image_2.image' => '写真2は画像ファイルを選択してください。',
+                'image_2.file' => '写真2は画像ファイルを選択してください。',
                 'image_2.mimes' => '写真2はjpeg, png, jpg, gif形式のファイルを選択してください。',
                 'image_2.max' => '写真2は10MB以下のファイルを選択してください。',
-                'image_3.image' => '写真3は画像ファイルを選択してください。',
+                'image_3.file' => '写真3は画像ファイルを選択してください。',
                 'image_3.mimes' => '写真3はjpeg, png, jpg, gif形式のファイルを選択してください。',
                 'image_3.max' => '写真3は10MB以下のファイルを選択してください。',
-                'image_4.image' => '写真4は画像ファイルを選択してください。',
+                'image_4.file' => '写真4は画像ファイルを選択してください。',
                 'image_4.mimes' => '写真4はjpeg, png, jpg, gif形式のファイルを選択してください。',
                 'image_4.max' => '写真4は10MB以下のファイルを選択してください。',
         ]);
@@ -321,12 +285,7 @@ class ProductRegistController extends Controller
 
         //構築されたクエリを実行し、結果を1ページあたり10件ずつページネーションして取得。
         $products = $query->paginate(10);
-
-        // デバッグ用ログ出力
-        foreach ($products as $product) {
-            \Log::info("Product ID: {$product->id}, Category: {$product->category_name}, Subcategory: {$product->subcategory_name}");
-        }
-
+        
         // 大カテゴリが選択されている場合、それに対応する小カテゴリのリストを取得。
         $subCategories = $mainCategory ? $this->getSubcategoriesArray($mainCategory) : [];
         return view('products.product_list', compact('products', 'mainCategory', 'subCategory', 'subCategories', 'search'));

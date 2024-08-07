@@ -63,7 +63,7 @@
         @for ($i = 1; $i <= 4; $i++)
         <div>
             写真{{ $i }}
-            <input type="file" name="image_{{ $i }}" id="image_{{ $i }}" accept=".jpg,.jpeg,.png,.gif" class="product-image">            <!--もしセッションやデータベースなどから既に登録されている商品画像があれば、その画像をプレビュー。asset()関数を使って画像のURLを生成、<img>要素で表示。<input type="hidden">`を使って、フォームデータとしても送信可能な形で既存画像のパスを隠しフィールドとして設定-->
+            <input type="file" name="image_{{ $i }}" id="image_{{ $i }}" accept=".jpg,.jpeg,.png,.gif" class="product-image" style="display: none;">
             <div id="image-preview-{{ $i }}" class="image-preview-container">
                 @if(isset($imageData["image_{$i}"]))
                     <img src="{{ asset('storage/' . $imageData["image_{$i}"]) }}" alt="商品画像{{ $i }}" style="width: 200px;">

@@ -59,11 +59,14 @@
     <!--productsテーブルから画像、大カテゴリ、小カテゴリ、商品名を取得して表示-->
     @foreach($products as $product)
     <div>
+        <!-- 商品写真 -->
         <img class="product-image" src="{{ asset('storage/' . $product->image_1) }}" alt="{{ $product->name }}">
         <p>
+        <!-- カテゴリ名 -->
             {{ $product->category_name }} > {{ $product->subcategory_name }}
         </p>
-        <h4>{{ $product->name }}</h4>
+        <!-- 商品名 -->
+        <p>{{ $product->name }}</hp>
     </div>
     @endforeach
 
