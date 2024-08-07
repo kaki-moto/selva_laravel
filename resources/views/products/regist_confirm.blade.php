@@ -32,6 +32,7 @@
                     写真{{ $i }}
                     <br>
                     <img src="{{ asset('storage/' . $validatedData["image_{$i}"]) }}" alt="商品画像{{ $i }}" style="width: 200px;">
+                    <input type="hidden" name="image_{{ $i }}" value="{{ $validatedData["image_{$i}"] }}">
                 </div>
             @endif
         @endfor

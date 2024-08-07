@@ -60,7 +60,11 @@
     @foreach($products as $product)
     <div>
         <!-- 商品写真 -->
+        @if($product->image_1)
         <img class="product-image" src="{{ asset('storage/' . $product->image_1) }}" alt="{{ $product->name }}">
+        @else
+        <img class="product-image" src="{{ asset('path/to/default/image.jpg') }}" alt="No Image">
+        @endif
         <p>
         <!-- カテゴリ名 -->
             {{ $product->category_name }} > {{ $product->subcategory_name }}

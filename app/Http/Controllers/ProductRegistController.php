@@ -264,7 +264,9 @@ class ProductRegistController extends Controller
         $search = $request->input('search');
 
         //商品を取得するためのクエリビルダーを初期化
-        $query = Product::with(['category', 'subcategory']);
+        $query = Product::with(['category', 'subcategory'])
+            //一覧にimgae_1だけを表示するため
+            ->select('id', 'name', 'product_category_id', 'product_subcategory_id', 'image_1');
 
         //大カテゴリや小カテゴリが選択されている場合、それに基づいてクエリを絞り込む。
         if ($mainCategory) {
