@@ -54,33 +54,89 @@ class ProductRegistController extends Controller
                         if (!array_key_exists($value, $validSubCategories)) {
                             $fail('選択された小カテゴリは無効です。');
                         }
+                        },
+                    ],
+                'product_description' => 'required|max:500',
+                'image_1' => [
+                'nullable',
+                'image',
+                'mimes:jpeg,png,jpg,gif',
+                'max:10240',
+                function ($attribute, $value, $fail) {
+                    if ($value) {
+                        $extension = strtolower($value->getClientOriginalExtension());
+                        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+                        if (!in_array($extension, $allowed)) {
+                            $fail('アップロードされたファイルは jpg, jpeg, png, gif 形式のみ許可されています。');
+                        }
+                    }
+                },
+                ],
+                'image_2' => [
+                    'nullable',
+                    'image',
+                    'mimes:jpeg,png,jpg,gif',
+                    'max:10240',
+                    function ($attribute, $value, $fail) {
+                        if ($value) {
+                            $extension = strtolower($value->getClientOriginalExtension());
+                            $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+                            if (!in_array($extension, $allowed)) {
+                                $fail('アップロードされたファイルは jpg, jpeg, png, gif 形式のみ許可されています。');
+                            }
+                        }
                     },
                 ],
-                'product_description' => 'required|max:500',
-                'image_1' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
-                'image_2' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
-                'image_3' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
-                'image_4' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
+                'image_3' => [
+                    'nullable',
+                    'image',
+                    'mimes:jpeg,png,jpg,gif',
+                    'max:10240',
+                    function ($attribute, $value, $fail) {
+                        if ($value) {
+                            $extension = strtolower($value->getClientOriginalExtension());
+                            $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+                            if (!in_array($extension, $allowed)) {
+                                $fail('アップロードされたファイルは jpg, jpeg, png, gif 形式のみ許可されています。');
+                            }
+                        }
+                    },
+                ],
+                'image_4' => [
+                    'nullable',
+                    'image',
+                    'mimes:jpeg,png,jpg,gif',
+                    'max:10240',
+                    function ($attribute, $value, $fail) {
+                        if ($value) {
+                            $extension = strtolower($value->getClientOriginalExtension());
+                            $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+                            if (!in_array($extension, $allowed)) {
+                                $fail('アップロードされたファイルは jpg, jpeg, png, gif 形式のみ許可されています。');
+                            }
+                        }
+                    },
+                ],
             ], [
-            'product_name.required' => '商品名を入力してください。',
-            'product_name.max' => '商品名は100文字以内で入力してください。',
-            'main_category.required' => '大カテゴリを選択してください。',
-            'sub_category.required' => '小カテゴリを選択してください。',
-            'main_category.in' => '無効な大カテゴリが選択されました。',
-            'product_description.required' => '商品説明を入力してください。',
-            'product_description.max' => '商品説明は500文字以内で入力してください。',
-            'image_1.image' => '写真1は画像ファイルを選択してください。',
-            'image_1.mimes' => '写真1はjpeg, png, jpg, gif形式のファイルを選択してください。',
-            'image_1.max' => '写真1は10MB以下のファイルを選択してください。',
-            'image_2.image' => '写真2は画像ファイルを選択してください。',
-            'image_2.mimes' => '写真2はjpeg, png, jpg, gif形式のファイルを選択してください。',
-            'image_2.max' => '写真2は10MB以下のファイルを選択してください。',
-            'image_3.image' => '写真3は画像ファイルを選択してください。',
-            'image_3.mimes' => '写真3はjpeg, png, jpg, gif形式のファイルを選択してください。',
-            'image_3.max' => '写真3は10MB以下のファイルを選択してください。',
-            'image_4.image' => '写真4は画像ファイルを選択してください。',
-            'image_4.mimes' => '写真4はjpeg, png, jpg, gif形式のファイルを選択してください。',
-            'image_4.max' => '写真4は10MB以下のファイルを選択してください。',
+                'product_name.required' => '商品名を入力してください。',
+                'product_name.max' => '商品名は100文字以内で入力してください。',
+                'main_category.required' => '大カテゴリを選択してください。',
+                'sub_category.required' => '小カテゴリを選択してください。',
+                'main_category.in' => '無効な大カテゴリが選択されました。',
+                'product_description.required' => '商品説明を入力してください。',
+                'product_description.max' => '商品説明は500文字以内で入力してください。',
+                'image_1.image' => '写真1は画像ファイルを選択してください。',
+                'image_1.mimes' => '写真1はjpeg, png, jpg, gif形式のファイルを選択してください。',
+                'image_1.max' => '写真1は10MB以下のファイルを選択してください。',
+                'image_2.image' => '写真2は画像ファイルを選択してください。',
+                'image_2.mimes' => '写真2はjpeg, png, jpg, gif形式のファイルを選択してください。',
+                'image_2.max' => '写真2は10MB以下のファイルを選択してください。',
+                'image_3.image' => '写真3は画像ファイルを選択してください。',
+                'image_3.mimes' => '写真3はjpeg, png, jpg, gif形式のファイルを選択してください。',
+                'image_3.max' => '写真3は10MB以下のファイルを選択してください。',
+                'image_4.image' => '写真4は画像ファイルを選択してください。',
+                'image_4.mimes' => '写真4はjpeg, png, jpg, gif形式のファイルを選択してください。',
+                'image_4.max' => '写真4は10MB以下のファイルを選択してください。',
         ]);
 
           // 画像のアップロード処理
@@ -183,13 +239,27 @@ class ProductRegistController extends Controller
 
     public function uploadImages(Request $request)
     {
-       $validator = Validator::make($request->all(), [
-           'product_images.*' => 'required|image|mimes:jpeg,png,gif|max:10240',
-       ]);
-
-       if ($validator->fails()) {
-           return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
-       }
+        $validator = Validator::make($request->all(), [
+            'product_images.*' => [
+                'required',
+                'image',
+                'mimes:jpeg,png,jpg,gif',
+                'max:10240',
+                function ($attribute, $value, $fail) {
+                    if ($value) {
+                        $extension = strtolower($value->getClientOriginalExtension());
+                        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+                        if (!in_array($extension, $allowed)) {
+                            $fail('アップロードされたファイルは jpg, jpeg, png, gif 形式のみ許可されています。');
+                        }
+                    }
+                },
+            ],
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
+        }
 
        $uploadedImages = [];
 
