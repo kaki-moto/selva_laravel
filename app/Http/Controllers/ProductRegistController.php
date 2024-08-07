@@ -283,9 +283,12 @@ class ProductRegistController extends Controller
             });
         }
 
+        // idの降順にソート
+        $query->orderBy('id', 'desc');
+
         //構築されたクエリを実行し、結果を1ページあたり10件ずつページネーションして取得。
         $products = $query->paginate(10);
-        
+
         // 大カテゴリが選択されている場合、それに対応する小カテゴリのリストを取得。
         $subCategories = $mainCategory ? $this->getSubcategoriesArray($mainCategory) : [];
         return view('products.product_list', compact('products', 'mainCategory', 'subCategory', 'subCategories', 'search'));
