@@ -37,7 +37,7 @@
         </select>
 
         <!--小カテゴリ-->
-        <select name="sub_category" id="sub-category">
+        <select name="sub_category" id="sub-category" style="display: none;">
             <option value="">選択してください</option>
             @foreach($subCategories as $key => $value)
             <option value="{{ $key }}" {{ $subCategory == $key ? 'selected' : '' }}>{{ $value }}</option>
@@ -97,14 +97,37 @@ $(document).ready(function() {
     }
 
     // 大カテゴリと小カテゴリの連動
-    $('#main-category').change(function() {
+    $('#main-category').change(function() { //大カテゴリが選択されたときに
         var mainCategoryId = $(this).val();
         if(mainCategoryId) {
-            loadSubCategories(mainCategoryId);
+            $.ajax({
+                url: '{{ route("get-subcategories") }}',
+                type: 'GET',
+                data: { main_category_id: mainCategoryId },
+                success: function(data) {
+                    $('#sub-category').empty();
+                    $('#sub-category').append('<option value="">選択してください</option>');
+                    $.each(data, function(key, value) {
+                        $('#sub-category').append('<option value="'+ key +'">'+ value +'</option>');
+                    });
+                    $('#sub-category').show(); // 小カテゴリを表示
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
         } else {
-            $('#sub-category').empty().append('<option value="">選択してください</option>');
+            $('#sub-category').hide(); // 小カテゴリを非表示
+            $('#sub-category').empty();
+            $('#sub-category').append('<option value="">選択してください</option>');
         }
     });
+
+    // ページ読み込み時に大カテゴリが選択されているかチェック
+    if($('#main-category').val()) { //ページ読み込み時に大カテゴリが既に選択されている場合（例えば、検索結果ページに戻ってきた場合）、小カテゴリを適切に表示するために$('#main-category').trigger('change');
+        $('#main-category').trigger('change');
+    }
+
 
     function loadSubCategories(mainCategoryId) {
         $.ajax({
