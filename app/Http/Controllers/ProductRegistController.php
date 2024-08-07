@@ -144,19 +144,6 @@ class ProductRegistController extends Controller
         // セッションからvalidatedDataを取得
         $validatedData = $request->session()->get('validatedData');
 
-        //main_categoryをDBに挿入。
-        //ProductCategoryモデルを使ってproduct_categoriesテーブルにアクセス
-        //firstOrCreate`メソッドは、指定した`name`（ここでは`$validatedData['main_category']`）が既に存在する場合、そのレコードを取得し、存在しない場合は新しく作成して挿入。
-        //挿入する際には、登録日時（`created_at`）と編集日時（`updated_at`）が自動的に現在の時刻に設定される。結果として、大カテゴリのモデルインスタンスが`$mainCategory`に代入される。
-        $mainCategory = ProductCategory::firstOrCreate(['name' => $validatedData['main_category']]);
-
-        //sub_categoryをDBに挿入
-        //ProductSubcategoryモデルを使ってproduct_subcategoriesテーブルにアクセス。以下同様。
-        $subCategory = ProductSubcategory::firstOrCreate([
-            'name' => $validatedData['sub_category'],
-            'product_category_id' => $mainCategory->id //product_category_id`には、先ほど取得した大カテゴリのID（`$mainCategory->id`）を設定。
-        ]);
-
         // ログイン中のユーザーのメールアドレスを取得
         $email = Auth::user()->email;
 
@@ -169,8 +156,8 @@ class ProductRegistController extends Controller
         // Productモデルを使って商品情報をDBに保存。Productsモデルにmembersテーブルよりmember_idを挿入、product_category_id、product_subcategory_idにカテゴリID、サブカテゴリIDを挿入、あとはnameに商品名、写真1-4に画像のURL?、登録日時と編集日時に今の時刻を挿入（スレッドID(id)は自動生成）
         $product = new Product();
         $product->member_id = $member->id; // 取得したmember_idを設定
-        $product->product_category_id = $mainCategory->id; //カテゴリID
-        $product->product_subcategory_id = $subCategory->id; //サブカテゴリID
+        $product->product_category_id = $validatedData['main_category']; // 直接カテゴリIDを保存
+        $product->product_subcategory_id = $validatedData['sub_category']; // 直接サブカテゴリIDを保存
         $product->name = $validatedData['product_name']; //商品名
         $product->product_content = $validatedData['product_description']; //商品説明
 
