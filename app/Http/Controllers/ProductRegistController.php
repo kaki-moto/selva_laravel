@@ -27,11 +27,13 @@ class ProductRegistController extends Controller
         $subCategories = $mainCategory ? $this->getSubcategoriesArray($mainCategory) : [];
 
         // 画像データの処理
-        $imageData = [];
-        for ($i = 1; $i <= 4; $i++) {
-            $key = "image_{$i}";
-            if (isset($validatedData[$key])) {
-                $imageData[$key] = $validatedData[$key];
+        $imageData = $request->session()->get('image_data', []);
+        if (empty($imageData)) {
+            for ($i = 1; $i <= 4; $i++) {
+                $key = "image_{$i}";
+                if (isset($validatedData[$key])) {
+                    $imageData[$key] = $validatedData[$key];
+                }
             }
         }
 
@@ -130,6 +132,21 @@ class ProductRegistController extends Controller
         return view('products.regist_confirm', compact('validatedData', 'uploadedImages', 'categoryName'));
 
     } catch (\Illuminate\Validation\ValidationException $e) {
+        // 既存の画像情報を保持
+        $imageData = [];
+        for ($i = 1; $i <= 4; $i++) {
+            $imageKey = "image_{$i}";
+            $existingImageKey = "existing_image_{$i}";
+            if ($request->hasFile($imageKey)) {
+                $imageData[$imageKey] = $request->file($imageKey)->store('temp_images', 'public');
+            } elseif ($request->has($existingImageKey)) {
+                $imageData[$imageKey] = $request->input($existingImageKey);
+            }
+        }
+        
+        // セッションに画像情報を保存
+        $request->session()->flash('image_data', $imageData);
+
         return redirect()->route('showRegist')
                          ->withErrors($e->errors())
                          ->withInput();
