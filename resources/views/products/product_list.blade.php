@@ -53,6 +53,7 @@
             border: none;
             padding: 0 5px;
         }
+
     </style>
 </head>
 <body>
@@ -107,12 +108,26 @@
         @else
         <img class="product-image" src="{{ asset('path/to/default/image.jpg') }}" alt="No Image">
         @endif
-        <p>
         <!-- カテゴリ名 -->
-            {{ $product->category_name }} > {{ $product->subcategory_name }}
-        </p>
-        <!-- 商品名 -->
-        <p>{{ $product->name }}</hp>
+        <p>{{ $product->category_name }} > {{ $product->subcategory_name }}</p>   
+        <!-- 商品名 クリックすると詳細へ-->
+        <p>
+            <a href="{{ route('showDetail', [
+                'id' => $product->id,
+                'page' => $products->currentPage(),
+                'main_category' => $mainCategory,
+                'sub_category' => $subCategory,
+                'search' => $search
+            ]) }}">{{ $product->name }}</a>
+        </p>        
+        <!-- 詳細ボタン、今のページ番号取得して詳細から一覧に戻る時一覧の同じページに戻れるように -->
+        <form action="{{ route('showDetail', ['id' => $product->id]) }}" method="GET">
+            <input type="hidden" name="page" value="{{ $products->currentPage() }}">
+            <input type="hidden" name="main_category" value="{{ $mainCategory }}">
+            <input type="hidden" name="sub_category" value="{{ $subCategory }}">
+            <input type="hidden" name="search" value="{{ $search }}">
+            <input type="submit" value="詳細" class="detail-button">
+        </form>
     </div>
     @endforeach
 

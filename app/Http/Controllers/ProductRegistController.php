@@ -316,11 +316,24 @@ class ProductRegistController extends Controller
         $query->orderBy('id', 'desc');
 
         //構築されたクエリを実行し、結果を1ページあたり10件ずつページネーションして取得。
-        $products = $query->paginate(10);
+        //$products = $query->paginate(10)->appends($request->except('page'));
+        $page = $request->get('page', 1);
+        $products = $query->paginate(10, ['*'], 'page', $page);
 
+        // 検索パラメータを保持するためにappendsを使用
+        $products->appends($request->except('page'));
+    
         // 大カテゴリが選択されている場合、それに対応する小カテゴリのリストを取得。
         $subCategories = $mainCategory ? $this->getSubcategoriesArray($mainCategory) : [];
         return view('products.product_list', compact('products', 'mainCategory', 'subCategory', 'subCategories', 'search'));
+    }
+
+    public function showDetail(Request $request, $id){
+        $product = Product::with(['category', 'subcategory'])->findOrFail($id);
+        $previousPage = $request->get('page', 1); // 一覧の2ページからの詳細からの一覧2ページにするため。リクエストからページ番号を取得、デフォルトは1
+        $searchParams = $request->only(['main_category', 'sub_category', 'search']); //検索条件の保持
+        $searchParams['page'] = $previousPage; // ページ番号も検索パラメータに追加
+        return view('products.product_detail', compact('product', 'searchParams'));
     }
 
 

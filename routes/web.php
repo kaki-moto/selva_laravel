@@ -47,3 +47,6 @@ Route::post('/upload-images', 'ProductRegistController@uploadImages')->name('upl
 
 Route::get('/product/list', 'ProductRegistController@showList')->name('showList');
 
+
+Route::get('/product/detail/{id}', 'ProductRegistController@showDetail')->name('showDetail');
+
