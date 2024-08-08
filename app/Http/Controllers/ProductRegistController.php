@@ -37,7 +37,17 @@ class ProductRegistController extends Controller
             }
         }
 
-        return view('products.product_regist', compact('subCategories', 'mainCategory', 'validatedData', 'imageData'));
+        //戻るボタンがトップから来た場合は「トップに戻る」、商品一覧から来た場合は「商品一覧に戻る」ボタンが表示される様に
+        $referer = $request->headers->get('referer'); //$request->headers->get('referer')を使用して、どのページから来たかを判断
+        $backUrl = route('top'); // デフォルトはトップページ
+        $backText = 'トップに戻る'; //これでボタンの文字を変える
+
+        if (strpos($referer, route('showList')) !== false) { //リファラーに商品一覧ページのURLが含まれている場合、商品一覧ページに戻るように
+            $backUrl = route('showList');
+            $backText = '商品一覧に戻る'; //これでボタンの文字を変える
+        }
+
+        return view('products.product_regist', compact('subCategories', 'mainCategory', 'validatedData', 'imageData', 'backUrl', 'backText'));
     }
 
     //商品登録フォームから送信されたデータを処理して、確認画面に表示させるためのメソッド
@@ -213,7 +223,7 @@ class ProductRegistController extends Controller
         $request->session()->forget('validatedData');
 
         // 登録成功したらトップにリダイレクト
-        return redirect()->route('top')->with('success', '商品が正常に登録されました');
+        return redirect()->route('showList')->with('success', '商品が正常に登録されました');
         
     }
 

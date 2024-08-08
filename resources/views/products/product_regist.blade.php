@@ -96,8 +96,9 @@
 
 </form>
 
-<form action="{{ route('top') }}" method="GET">
-    <button type="submit">トップへ戻る</button>
+<!--トップから来たら「トップに戻る」、商品一覧から来たら「商品一覧にもどる」これはコントローラのshowRegistで定義-->
+<form action="{{ $backUrl }}" method="GET">
+    <button type="submit">{{ $backText }}</button>
 </form>
 
 
