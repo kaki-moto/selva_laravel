@@ -41,6 +41,20 @@
     <p>◾️ 商品説明</p>
     <p>{{ $product->product_content }}</p>
 
+    <!--商品レビュー-->
+    <p>◾️ 商品レビュー</p>
+    <p>総合評価</p>
+
+
+    <!--商品レビュー一覧へボタン-->
+    <a href="{{ route('showReviewList') }}">＞＞レビューを見る</a>
+    
+    <!--レビュー登録フォームへへ遷移ボタン-->
+    <form action="{{ route('showRegistReview') }}" method="GET">
+            <button type="submit">この商品についてのレビューを登録</button>
+    </form>
+
+    <!--商品一覧に戻るボタン-->
     <form action="{{ route('showList') }}" method="GET">
     @foreach($searchParams as $key => $value)
         @if($value)
