@@ -11,6 +11,48 @@
         height: auto; /* アスペクト比を維持 */
         max-width: 200px; /* 必要に応じて最大幅を設定 */
     }
+
+    .pagination {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pagination li {
+            margin: 0 5px;
+        }
+
+        .pagination li a,
+        .pagination li span {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            background-color: #f8f8f8;
+            color: #333;
+            text-decoration: none;
+            border-radius: 3px;
+        }
+
+        .pagination li.active span {
+            background-color: #a0a0a0; /* 背景は濃いグレー */
+            color: #fff; /* テキストは白 */
+            border-color: #909090; /* ボーダーの色 */
+        }
+
+        .pagination li a:hover {
+            background-color: #e9e9e9;
+        }
+
+        .pagination li.disabled span {
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .pagination li.dots span {
+            border: none;
+            padding: 0 5px;
+        }
     </style>
 </head>
 <body>
@@ -74,7 +116,8 @@
     </div>
     @endforeach
 
-    {{ $products->links() }}
+    <!-- ページネーションを挿入 -->
+    {{ $products->links('vendor.pagination.custom') }}
 
         <form action="{{ route('top') }}" method="GET">
             <button type="submit">トップへ戻る</button>
