@@ -34,17 +34,27 @@
 
     <!--商品レビュー登録フォーム-->
     <form action="{{ route('confirmReview') }}" method="POST">
-    @csrf      
+    @csrf
+        <input type="hidden" name="product_id" value="{{ $product->id }}">
+
         <p>商品評価</p>
-        <select>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
+        <select name="evaluation">
+            <option value="">選択してください</option>
+            <option value="1" {{ old('evaluation', $validatedData['evaluation'] ?? '') == '1' ? 'selected' : '' }}>1</option>
+            <option value="2" {{ old('evaluation', $validatedData['evaluation'] ?? '') == '2' ? 'selected' : '' }}>2</option>
+            <option value="3" {{ old('evaluation', $validatedData['evaluation'] ?? '') == '3' ? 'selected' : '' }}>3</option>
+            <option value="4" {{ old('evaluation', $validatedData['evaluation'] ?? '') == '4' ? 'selected' : '' }}>4</option>
+            <option value="5" {{ old('evaluation', $validatedData['evaluation'] ?? '') == '5' ? 'selected' : '' }}>5</option>
         </select>
+        @error('evaluation')
+        <div style="color: red;">{{ $message }}</div>
+        @enderror
+
         <p>商品コメント</p>
-        <textarea></textarea>
+        <textarea name="comment">{{ old('comment', $validatedData['comment'] ?? '') }}</textarea>
+        @error('comment')
+        <div style="color: red;">{{ $message }}</div>
+        @enderror
 
         <p><input type="submit" value="商品レビュー登録確認"></p>
     </form>

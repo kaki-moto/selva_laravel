@@ -16,8 +16,16 @@
     <main>
     <p>商品レビューの登録が完了しました。</p>
 
-    <!---->
-    <!---->
+    <!--商品レビュー一覧へ-->
+    <form action="{{ route('showReviewList') }}" method="GET">
+            <button type="submit">商品レビュー一覧へ</button>
+    </form>
+
+    <!--商品詳細に戻る-->
+    <form action="{{ route('showDetail', ['id' => $product->id] ) }}" method="GET">
+            <button type="submit">商品詳細に戻る</button>
+    </form>
+
     </main>
 
 </body>
