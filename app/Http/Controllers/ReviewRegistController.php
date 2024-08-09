@@ -99,13 +99,22 @@ class ReviewRegistController extends Controller
         $product = Product::findOrFail($productId);
         
         // この商品に関連するレビューを取得
-        $reviews = ReviewRegist::where('product_id', $productId)->get();
+        //$reviews = ReviewRegist::where('product_id', $productId)->get();
+
+        // この商品に関連する全てのレビューを取得
+        $reviewsQuery = ReviewRegist::where('product_id', $productId);
+
+        // レビューの総数を取得
+        $totalReviews = $reviewsQuery->count();
 
         // ページネーションのための処理
-        $page = $request->get('page', 1);
-        $reviews = ReviewRegist::where('product_id', $productId)->paginate(10, ['*'], 'page', $page);
+        //$page = $request->get('page', 1);
+        //$reviews = ReviewRegist::where('product_id', $productId)->paginate(5, ['*'], 'page', $page);
+
+        // ページネーションのための処理 (1ページあたり5件ずつ表示)
+        $reviews = $reviewsQuery->paginate(5);
 
 
-        return view('reviews.review_list', compact('product', 'reviews') );
+        return view('reviews.review_list', compact('product', 'reviews', 'totalReviews') );
     }
 }

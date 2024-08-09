@@ -92,7 +92,9 @@
     @endif
 
     <!-- ページネーションを挿入 -->
-    {{ $reviews->links('vendor.pagination.custom') }}
+    @if ($totalReviews > 5)
+        {{ $reviews->links('vendor.pagination.custom') }}
+    @endif
 
     <form action="{{ route('showDetail', ['id' => $product->id]) }}" method="GET">
         <button type="submit">商品詳細に戻る</button>
