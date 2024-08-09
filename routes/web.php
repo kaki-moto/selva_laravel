@@ -42,7 +42,7 @@ Route::get('/product/list', 'ProductRegistController@showList')->name('showList'
 Route::get('/product/detail/{id}', 'ProductRegistController@showDetail')->name('showDetail');
 
 //登録フォーム表示するだけ
-Route::get('/review/regist', 'ReviewRegistController@showRegist')->name('showRegistReview');
+Route::get('/review/regist/{productId}', 'ReviewRegistController@showRegist')->name('showRegistReview');
 //バリデーションして確認画面を表示
 Route::post('/review/confirm', 'ReviewRegistController@confirm')->name('confirmReview');
 //商品レビュー一覧表示するだけ

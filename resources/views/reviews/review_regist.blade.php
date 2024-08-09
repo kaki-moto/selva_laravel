@@ -13,16 +13,28 @@
         </form>
     </header>
     <main>
+
+    @if(isset($product))
     <!--商品写真-->
+    @if($product->image_1)
+        <img src="{{ asset('storage/' . $product->image_1) }}" alt="{{ $product->name }}">
+    @else
+        <p>No image available</p>
+    @endif
 
     <!--商品名-->
     {{ $product->name }}
     
-    <!--商品総合評価-->
+    @endif
 
+    <!--商品総合評価-->
+    <p>総合評価</p>
+
+    
 
     <!--商品レビュー登録フォーム-->
     <form action="{{ route('confirmReview') }}" method="POST">
+    @csrf      
         <p>商品評価</p>
         <select>
             <option value="1">1</option>
@@ -37,7 +49,7 @@
         <p><input type="submit" value="商品レビュー登録確認"></p>
     </form>
 
-    <form action="{{ route('showList') }}" method="GET">
+    <form action="{{ route('showDetail', ['id' => $product->id] ) }}" method="GET">
             <button type="submit">商品詳細に戻る</button>
     </form>
 

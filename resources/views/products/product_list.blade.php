@@ -120,7 +120,7 @@
                 'search' => $search
             ]) }}">{{ $product->name }}</a>
         </p>        
-        <!-- 詳細ボタン、今のページ番号取得して詳細から一覧に戻る時一覧の同じページに戻れるように -->
+        <!-- 詳細ボタン、今のページ番号取得して詳細から一覧に戻る時一覧の同じページに戻れるように、web.phpで{id}としている-->
         <form action="{{ route('showDetail', ['id' => $product->id]) }}" method="GET">
             <input type="hidden" name="page" value="{{ $products->currentPage() }}">
             <input type="hidden" name="main_category" value="{{ $mainCategory }}">
