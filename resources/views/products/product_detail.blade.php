@@ -47,7 +47,7 @@
 
 
     <!--商品レビュー一覧へボタン-->
-    <a href="{{ route('showReviewList') }}">＞＞レビューを見る</a>
+    <a href="{{ route('showReviewList', ['productId' => $product->id]) }}">＞＞レビューを見る</a>
     
     <!--レビュー登録フォームへへ遷移ボタン、web.phpで'/review/regist/{productId}'としているから-->
     <form action="{{ route('showRegistReview', ['productId' => $product->id] ) }}" method="GET">

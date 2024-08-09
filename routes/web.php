@@ -49,7 +49,7 @@ Route::post('/review/confirm', 'ReviewRegistController@showConfirm')->name('conf
 Route::post('/review/complete', 'ReviewRegistController@showComp')->name('showComp');
 
 //商品レビュー一覧表示するだけ
-Route::get('/review/list', 'ReviewRegistController@showReviewList')->name('showReviewList');
+Route::get('/review/list/{productId}', 'ReviewRegistController@showReviewList')->name('showReviewList');
 
 
 

@@ -92,9 +92,20 @@ class ReviewRegistController extends Controller
         return view('reviews.review_comp', compact('product'));
     }
 
-    //レビュー一覧表示するだけ
-    public function showReviewList()
+    //商品ID渡してレビュー一覧表示するだけ
+    public function showReviewList(Request $request, $productId)
     {
-        return view('reviews.review_list');
+        // 商品情報を取得
+        $product = Product::findOrFail($productId);
+        
+        // この商品に関連するレビューを取得
+        $reviews = ReviewRegist::where('product_id', $productId)->get();
+
+        // ページネーションのための処理
+        $page = $request->get('page', 1);
+        $reviews = ReviewRegist::where('product_id', $productId)->paginate(10, ['*'], 'page', $page);
+
+
+        return view('reviews.review_list', compact('product', 'reviews') );
     }
 }

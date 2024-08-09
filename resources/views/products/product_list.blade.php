@@ -128,6 +128,7 @@
             <input type="hidden" name="search" value="{{ $search }}">
             <input type="submit" value="詳細" class="detail-button">
         </form>
+        <hr>
     </div>
     @endforeach
 
