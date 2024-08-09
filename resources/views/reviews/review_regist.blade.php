@@ -21,16 +21,16 @@
     @else
         <p>No image available</p>
     @endif
-
     <!--商品名-->
     {{ $product->name }}
-    
     @endif
 
     <!--商品総合評価-->
-    <p>総合評価</p>
-
-    
+    @if(isset($averageRating))
+    <p>総合評価 {{ str_repeat('★', $averageRating) }} {{ $averageRating }}</p>
+    @else
+    <p>総合評価 未評価</p>
+    @endif
 
     <!--商品レビュー登録フォーム-->
     <form action="{{ route('confirmReview') }}" method="POST">

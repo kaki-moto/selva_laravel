@@ -43,16 +43,22 @@
 
     <!--商品レビュー-->
     <p>◾️ 商品レビュー</p>
-    <p>総合評価</p>
+    @if(isset($averageRating))
+    <p>総合評価 {{ str_repeat('★', $averageRating) }} {{ $averageRating }}</p>
+    @else
+    <p>総合評価 未評価</p>
+    @endif
 
 
     <!--商品レビュー一覧へボタン-->
     <a href="{{ route('showReviewList', ['productId' => $product->id]) }}">＞＞レビューを見る</a>
     
+    @auth
     <!--レビュー登録フォームへへ遷移ボタン、web.phpで'/review/regist/{productId}'としているから-->
     <form action="{{ route('showRegistReview', ['productId' => $product->id] ) }}" method="GET">
             <button type="submit">この商品についてのレビューを登録</button>
     </form>
+    @endauth
 
     <!--商品一覧に戻るボタン-->
     <form action="{{ route('showList') }}" method="GET">

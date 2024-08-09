@@ -33,6 +33,13 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/product/confirm', 'ProductRegistController@showConfirm')->name('product_confirm');
     //登録完了ボタンを押したら
     Route::post('/product/regist', 'ProductRegistController@productRegist')->name('product_regist');
+    
+    //登録フォーム表示するだけ
+    Route::get('/review/regist/{productId}', 'ReviewRegistController@showRegist')->name('showRegistReview');
+    //バリデーションして確認画面を表示
+    Route::post('/review/confirm', 'ReviewRegistController@showConfirm')->name('confirmReview');
+    //DBに登録して完了画面を表示
+    Route::post('/review/complete', 'ReviewRegistController@showComp')->name('showComp');
 });
 
 //カテゴリ
@@ -41,12 +48,6 @@ Route::post('/upload-images', 'ProductRegistController@uploadImages')->name('upl
 Route::get('/product/list', 'ProductRegistController@showList')->name('showList');
 Route::get('/product/detail/{id}', 'ProductRegistController@showDetail')->name('showDetail');
 
-//登録フォーム表示するだけ
-Route::get('/review/regist/{productId}', 'ReviewRegistController@showRegist')->name('showRegistReview');
-//バリデーションして確認画面を表示
-Route::post('/review/confirm', 'ReviewRegistController@showConfirm')->name('confirmReview');
-//DBに登録して完了画面を表示
-Route::post('/review/complete', 'ReviewRegistController@showComp')->name('showComp');
 
 //商品レビュー一覧表示するだけ
 Route::get('/review/list/{productId}', 'ReviewRegistController@showReviewList')->name('showReviewList');

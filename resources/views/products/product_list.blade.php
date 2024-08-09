@@ -119,7 +119,13 @@
                 'sub_category' => $subCategory,
                 'search' => $search
             ]) }}">{{ $product->name }}</a>
-        </p>        
+        </p>
+        <!-- 総合評価 -->
+        @if(isset($averageRatings[$product->id]))
+        <p>総合評価 {{ str_repeat('★', $averageRatings[$product->id]) }} {{ $averageRatings[$product->id] }}</p>
+        @else
+        <p>総合評価 未評価</p>
+        @endif
         <!-- 詳細ボタン、今のページ番号取得して詳細から一覧に戻る時一覧の同じページに戻れるように、web.phpで{id}としている-->
         <form action="{{ route('showDetail', ['id' => $product->id]) }}" method="GET">
             <input type="hidden" name="page" value="{{ $products->currentPage() }}">

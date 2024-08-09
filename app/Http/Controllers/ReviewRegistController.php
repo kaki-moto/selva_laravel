@@ -9,6 +9,8 @@ use App\ProductCategory;
 use App\ProductSubcategory;
 use App\Member;
 use App\ReviewRegist;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class ReviewRegistController extends Controller
 {
@@ -17,10 +19,17 @@ class ReviewRegistController extends Controller
     {
         //DBのmembersテーブルから画像1枚、商品名を取得
         $product = Product::findOrFail($productId);
+
+        // 商品に関連するレビューを取得（評価の平均値も取得する）
+        $averageRating = ReviewRegist::where('product_id', $productId)
+        ->avg('evaluation');
+        // 評価の平均値を切り上げして整数にする
+        $averageRating = ceil($averageRating);
+
         //確認画面から戻った場合の処理
         $validatedData = session()->get('validatedData', []);
 
-        return view('reviews.review_regist', compact('product', 'validatedData')); //ここでvalidationDataを渡すことで「前に戻る」で戻った時に確認画面に表示されていたデータが保持される。
+        return view('reviews.review_regist', compact('product', 'validatedData', 'averageRating')); //ここでvalidationDataを渡すことで「前に戻る」で戻った時に確認画面に表示されていたデータが保持される。
     }
 
     //バリデーションして、DBから商品画像と商品名取得して、確認画面表示する
@@ -98,23 +107,20 @@ class ReviewRegistController extends Controller
         // 商品情報を取得
         $product = Product::findOrFail($productId);
         
-        // この商品に関連するレビューを取得
-        //$reviews = ReviewRegist::where('product_id', $productId)->get();
-
-        // この商品に関連する全てのレビューを取得
-        $reviewsQuery = ReviewRegist::where('product_id', $productId);
+        // 商品に関連する全てのレビューを取得（評価の平均値も取得する）
+        $averageRating = ReviewRegist::where('product_id', $productId)
+        ->avg('evaluation');
+        // 評価の平均値を切り上げして整数にする
+        $averageRating = ceil($averageRating);
 
         // レビューの総数を取得
-        $totalReviews = $reviewsQuery->count();
+        $totalReviews = ReviewRegist::where('product_id', $productId)->count();
 
-        // ページネーションのための処理
-        //$page = $request->get('page', 1);
-        //$reviews = ReviewRegist::where('product_id', $productId)->paginate(5, ['*'], 'page', $page);
+        // この商品に関連するレビューを取得し、1ページあたり5件ずつ表示
+        $reviews = ReviewRegist::where('product_id', $productId)
+        ->with('member')  // 関連するメンバー情報も一緒に取得
+        ->paginate(5);
 
-        // ページネーションのための処理 (1ページあたり5件ずつ表示)
-        $reviews = $reviewsQuery->paginate(5);
-
-
-        return view('reviews.review_list', compact('product', 'reviews', 'totalReviews') );
+        return view('reviews.review_list', compact('product', 'reviews', 'totalReviews', 'averageRating') );
     }
 }

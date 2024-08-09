@@ -11,4 +11,9 @@ class ReviewRegist extends Model
     protected $fillable = [
         'member_id', 'product_id', 'evaluation', 'comment'
     ]; 
+
+    public function member()
+    {
+        return $this->belongsTo(Member::class, 'member_id');
+    }
 }

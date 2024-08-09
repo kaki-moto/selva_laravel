@@ -10,6 +10,7 @@ use App\Product; // Productモデルのインポート
 use App\ProductCategory; // ProductCategoryモデルのインポート
 use App\ProductSubcategory; // ProductSubcategoryモデルのインポート
 use App\Member; // Memberモデルのインポート
+use App\ReviewRegist; 
 use \Exception;
 
 class ProductRegistController extends Controller
@@ -325,7 +326,16 @@ class ProductRegistController extends Controller
     
         // 大カテゴリが選択されている場合、それに対応する小カテゴリのリストを取得。
         $subCategories = $mainCategory ? $this->getSubcategoriesArray($mainCategory) : [];
-        return view('products.product_list', compact('products', 'mainCategory', 'subCategory', 'subCategories', 'search'));
+
+        // 各商品の評価平均を取得し、小数点以下を切り上げ
+        $averageRatings = [];
+        foreach ($products as $product) {
+            $averageRating = ReviewRegist::where('product_id', $product->id)
+                ->avg('evaluation');
+            $averageRatings[$product->id] = $averageRating ? ceil($averageRating) : null;
+        }
+
+        return view('products.product_list', compact('products', 'mainCategory', 'subCategory', 'subCategories', 'search', 'averageRatings'));
     }
 
     public function showDetail(Request $request, $id){
@@ -333,7 +343,14 @@ class ProductRegistController extends Controller
         $previousPage = $request->get('page', 1); // 一覧の2ページからの詳細からの一覧2ページにするため。リクエストからページ番号を取得、デフォルトは1
         $searchParams = $request->only(['main_category', 'sub_category', 'search']); //検索条件の保持
         $searchParams['page'] = $previousPage; // ページ番号も検索パラメータに追加
-        return view('products.product_detail', compact('product', 'searchParams'));
+
+        // 商品に関連する全てのレビューを取得（評価の平均値も取得する）
+        $averageRating = ReviewRegist::where('product_id', $id)
+        ->avg('evaluation');
+        // 評価の平均値を切り上げして整数にする
+        $averageRating = ceil($averageRating);
+        
+        return view('products.product_detail', compact('product', 'searchParams', 'averageRating'));
     }
 
 

@@ -65,24 +65,24 @@
     @else
         <p>No image available</p>
     @endif
-
     <!--商品名-->
     {{ $product->name }}
-    
     @endif
-
     <!--商品総合評価-->
-    <p>総合評価</p>
-
-
+    @if(isset($averageRating))
+    <p>総合評価 {{ str_repeat('★', $averageRating) }} {{ $averageRating }}</p>
+    @else
+    <p>総合評価 未評価</p>
+    @endif
 
     <!--コメント一覧-->
     @if($reviews->count() > 0)
         @foreach($reviews as $review)
             <div class="review">
                 <!--名前-->
+                <p>{{ $review->member->nickname }}さん</p>
                 <!--★-->
-                <p> {{ $review->evaluation }}</p>
+                <p>{{ str_repeat('★', $review->evaluation) }} {{ $review->evaluation }}</p>
                 <p>商品コメント {{ $review->comment }}</p>
             </div>
             <hr>
