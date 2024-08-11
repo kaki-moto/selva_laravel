@@ -43,6 +43,10 @@ Route::group(['middleware' => 'auth'], function () {
 
     //トップページからマイページに遷移
     Route::get('/mypage', 'MemberRegistController@showMypage')->name('showMypage');
+    Route::get('/withdrawal', 'MemberRegistController@showWithdrawal')->name('showWithdrawal');
+    
+    Route::post('/withdrawal/delete', 'MemberRegistController@withdrawal')->name('withdrawal');
+
 });
 
 //カテゴリ

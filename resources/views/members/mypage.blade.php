@@ -3,12 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>トップ画面</title>
+    <title>マイページ</title>
 </head>
 <body>
     <header>
         <h3>マイページ</h3>
-        <a href="{{ route('top') }}">トップへ戻る</a>
+        <a href="{{ route('top') }}">トップに戻る</a>
         <a href="{{ route('logout') }}">ログアウト</a>
     </header>
     <main>
@@ -36,6 +36,11 @@
             メールアドレス
             {{ $member->email }}
         </label>
+
+        <form action="{{ route('showWithdrawal') }}" method="GET">
+            <input type="submit" value="退会">
+        </form>
+
     </main>
 
 </body>

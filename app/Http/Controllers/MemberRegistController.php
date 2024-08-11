@@ -260,6 +260,34 @@ class MemberRegistController extends Controller
         // ログインユーザーの情報を取得
         $member = Auth::user(); // この場合、$memberはMemberモデルのインスタンスになる
         return view('members.mypage', compact('member'));
-    }    
+    }
+
+    public function showWithdrawal()
+    {
+        return view('members.withdrawal');
+    }
+
+    public function withdrawal()
+    {
+        //ソフトデリート処理
+        $member = Auth::user();
+    
+        if ($member) {
+            // ソフトデリート実行
+            $member->delete();
+            
+            // ログアウト
+            Auth::logout();
+            
+            // セッションを無効化
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+            
+            // 退会完了メッセージをフラッシュデータとして保存
+            return redirect()->route('top')->with('status', '退会処理が完了しました。');
+        }
+    
+        return redirect()->route('top')->with('error', '退会処理に失敗しました。');
+    }
 
 }
