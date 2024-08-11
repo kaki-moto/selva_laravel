@@ -12,6 +12,7 @@
         <p>ようこそ {{ Auth::user()->full_name }} 様</p>
         <a href="{{ route('showList') }}">商品一覧</a>
         <a href="{{ route('showRegist') }}">新規商品登録</a>
+        <a href="{{ route('showMypage') }}">マイページ</a>
         <a href="{{ route('logout') }}">ログアウト</a>
         @endauth
 

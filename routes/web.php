@@ -40,6 +40,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/review/confirm', 'ReviewRegistController@showConfirm')->name('confirmReview');
     //DBに登録して完了画面を表示
     Route::post('/review/complete', 'ReviewRegistController@showComp')->name('showComp');
+
+    //トップページからマイページに遷移
+    Route::get('/mypage', 'MemberRegistController@showMypage')->name('showMypage');
 });
 
 //カテゴリ
@@ -51,6 +54,8 @@ Route::get('/product/detail/{id}', 'ProductRegistController@showDetail')->name('
 
 //商品レビュー一覧表示するだけ
 Route::get('/review/list/{productId}', 'ReviewRegistController@showReviewList')->name('showReviewList');
+
+
 
 
 

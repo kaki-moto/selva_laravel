@@ -255,4 +255,11 @@ class MemberRegistController extends Controller
         return redirect()->route('top');
     }
 
+    public function showMypage()
+    {
+        // ログインユーザーの情報を取得
+        $member = Auth::user(); // この場合、$memberはMemberモデルのインスタンスになる
+        return view('members.mypage', compact('member'));
+    }    
+
 }
