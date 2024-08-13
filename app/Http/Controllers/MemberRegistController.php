@@ -290,4 +290,76 @@ class MemberRegistController extends Controller
         return redirect()->route('top')->with('error', '退会処理に失敗しました。');
     }
 
+    public function showChangeForm()
+    {
+        //validationDataあれば
+        // セッションからregistration_dataというキーのデータを取得（存在する場合）。session('registration_data')はバリデーションOKのデータ。
+        $registrationData = session('validationData', []);
+
+        //フォームを表示
+        return view('members.change_regist', compact('registrationData'));
+    }
+
+    public function changeConfirm(Request $request)
+    {
+        //バリデーション
+        $validatedData = $request->validate([
+            'name_mei' => 'required|max:20',
+            'name_sei' => 'required|max:20',
+            'nickname' => 'required|max:10',
+            'gender' => 'required|in:1,2', //value値に1, 2以外を入れるとエラーに
+        ]);
+
+        // $validatedDataをセッションにchange_dataというキーで保存する。session('registration_data')でバリデーションOKのデータを呼び出せる。
+        $request->session()->put('change_data', $validatedData);
+        
+        //二重送信防止
+        $token = Str::random(40);
+        $request->session()->put('form_token', $token);
+        
+        //エラーなければ遷移。確認画面表示。エラーあれば自動的に元のフォームにリダイレクト、エラーメッセージをセッションに保存、入力された値をセッションに一時保存・フォームに再表示
+        return view('members.change_confirm', compact('validatedData', 'token')); //{{ $validatedData['family'] }}のようにビューで表示できる
+    }
+
+    public function changeMemberInfo(Request $request)
+    {
+
+            // トークン検証
+        $token = $request->input('form_token');
+        if ($token !== session('form_token')) {
+            return redirect()->route('showChangeForm')->with('error', '不正な操作が検出されました。もう一度やり直してください。');
+        }
+        session()->forget('form_token');
+
+        // セッションから変更データを取得
+        $validatedData = session('change_data');
+        if (!$validatedData) {
+            return redirect()->route('showChangeForm')->with('error', '変更情報が見つかりません。再度お試しください。');
+        }
+
+        // ログインユーザーの取得
+        $user = Auth::user();
+
+        // データの更新
+        $user->update([
+            'name_sei' => $validatedData['name_sei'],
+            'name_mei' => $validatedData['name_mei'],
+            'nickname' => $validatedData['nickname'],
+            'gender' => $validatedData['gender'],
+        ]);
+
+        // セッションのクリア
+        $request->session()->forget('change_data');
+
+        // マイページにリダイレクト（成功メッセージ付き）
+        return redirect()->route('showMypage');
+    }
+
+    public function backChangeForm()
+    {
+        $changeData = session('change_data', []);
+        //前に戻るボタン押したら登録フォームに戻る
+        return view('members.change_regist', compact('changeData'));
+    }
+
 }

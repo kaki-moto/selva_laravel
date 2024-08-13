@@ -27,10 +27,21 @@
             {{ config('master.gender.' . $member->gender, '不明') }}
         </label>
         <br>
+
+        <form action="{{ route('showChangeForm') }}" method="GET">
+            <input type="submit" value="会員情報変更">
+        </form>
+
+        <br>
         <label>
             パスワード
             セキュリティのため非表示
         </label>
+
+        <form action="{{ route('password') }}" method="GET">
+            <input type="submit" value="パスワード変更">
+        </form>
+        
         <br>
         <label>
             メールアドレス

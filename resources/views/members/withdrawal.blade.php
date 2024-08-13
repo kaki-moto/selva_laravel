@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>トップ画面</title>
+    <title>退会確認画面</title>
 </head>
 <body>
     <header>

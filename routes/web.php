@@ -27,6 +27,12 @@ Route::get('/reset/{token}', 'MemberRegistController@showReset')->name('showRese
 // リセットするボタン押したら、リセットしてエラーなけれな再設定完了まで
 Route::post('/reset', 'MemberRegistController@reset')->name('reset');
 
+//マイページで会員情報変更ボタン押したら再登録フォームを表示
+Route::get('/change/member', 'MemberRegistController@showChangeForm')->name('showChangeForm');
+Route::post('/change/member/confirm', 'MemberRegistController@changeConfirm')->name('changeConfirm');
+Route::post('/change/member/change', 'MemberRegistController@changeMemberInfo')->name('changeMemberInfo');
+Route::post('/change/member/back', 'MemberRegistController@backChangeForm')->name('backChangeForm');
+
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/product/regist', 'ProductRegistController@showRegist')->name('showRegist');
     //確認画面へを押したら
@@ -48,6 +54,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/withdrawal/delete', 'MemberRegistController@withdrawal')->name('withdrawal');
 
 });
+
+
+
+
 
 //カテゴリ
 Route::get('/get-subcategories', 'ProductRegistController@getSubcategories')->name('get-subcategories');
