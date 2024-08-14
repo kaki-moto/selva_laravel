@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth; // Authファサードのインポートを
 use Illuminate\Support\Facades\Validator; //Validatorクラスを使用するためインポート
 use App\Mail\ResettingMail;
 use Illuminate\Support\Facades\DB;
+use App\Mail\EmailChangeVerification;
 
 class MemberRegistController extends Controller
 {
@@ -361,5 +362,97 @@ class MemberRegistController extends Controller
         //前に戻るボタン押したら登録フォームに戻る
         return view('members.change_regist', compact('changeData'));
     }
+
+
+    public function showEmailChange()
+    {
+        //emailを表示するためデータ取得
+        // ログインユーザーの情報を取得
+        $member = Auth::user(); // この場合、$memberはMemberモデルのインスタンスになる
+        //パスワード変更ページに
+        return view('members.email_change', compact('member'));
+    }
+
+
+    public function sendEmailResetting(Request $request)
+    {
+        //新しいメールアドレスのバリデーションチェック
+        $request->validate([
+            'new_email' => 'required|email|unique:members,email'
+        ], [
+            'new_email.required' => 'メールアドレスを入力してください。', // ここでのemailはemail_change.blade.phpのinputタグのname属性
+            'new_email.email' => '有効なメールアドレスを入力してください。',
+            'new_email.exists' => '登録されていないメールアドレスです。',
+        ]);
+
+        $user = Auth::user();
+        $verificationCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        // 認証コードをmembersテーブルのauth_codeカラムに保存
+        $user->auth_code = $verificationCode;
+        $user->save();
+
+        // セッションに新しいメールアドレスを一時的に保存
+        session(['new_email' => $request->new_email]);
+
+        // 認証メールを送信
+        Mail::to($request->new_email)
+        ->send(new EmailChangeVerification($verificationCode));
+
+        return redirect()->route('showEmailChangeConfirm')->with('message', '認証コードを送信しました。');
+
+    }
+
+    public function passChange()
+    {
+        //メールアドレス変更 認証コード入力ページを表示
+        return view('members.email_change_confirm');
+    }
+
+    public function verifyAndChangeEmail(Request $request)
+    {
+        $customMessages = [
+            'verification_code.required' => '認証コードを入力してください。',
+            'verification_code.string' => '認証コードは文字列である必要があります。',
+            'verification_code.digits' => '認証コードは6桁の数字である必要があります。',
+        ];
+
+        $request->validate([
+            'verification_code' => 'required|string|digits:6'
+        ], $customMessages);
+
+        $user = Auth::user();
+
+        $inputCode = $request->verification_code;
+        $storedCode = $user->auth_code;
+    
+        if ((string)$storedCode !== (string)$inputCode) {
+            return back()->withErrors(['verification_code' => '無効な認証コードです。']);
+        }
+    
+        $newEmail = session('new_email');
+        if (!$newEmail) {
+            return back()->withErrors(['email' => 'メールアドレスの情報が見つかりません。最初からやり直してください。']);
+        }
+    
+        // メールアドレスを更新
+        $user->email = $newEmail;
+        $user->auth_code = null; // 認証コードをクリア
+        $user->save();
+    
+        // セッションから一時的な情報を削除
+        session()->forget('new_email');
+    
+        return redirect()->route('showMypage')->with('status', 'メールアドレスが正常に更新されました。');
+    }
+
+    public function showEmailChangeConfirm()
+    {
+        return view('members.email_change_confirm');
+    }
+
+
+
+    
 
 }

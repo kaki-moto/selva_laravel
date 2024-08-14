@@ -33,6 +33,18 @@ Route::post('/change/member/confirm', 'MemberRegistController@changeConfirm')->n
 Route::post('/change/member/change', 'MemberRegistController@changeMemberInfo')->name('changeMemberInfo');
 Route::post('/change/member/back', 'MemberRegistController@backChangeForm')->name('backChangeForm');
 
+
+
+//マイページでメールアドレス変更画面にとぶ
+Route::get('/change/email', 'MemberRegistController@showEmailChange')->name('showEmailChange');
+//メールアドレス変更ページで認証メール送信ボタンを押すと認証コードのメール送信して、認証コード入力ページを表示
+Route::post('/change/sendEmail', 'MemberRegistController@sendEmailResetting')->name('sendEmailResetting');
+Route::get('/email/change/confirm', 'MemberRegistController@showEmailChangeConfirm')->name('showEmailChangeConfirm');
+//認証コード入力してボタン押すと
+Route::post('/change/email/verify', 'MemberRegistController@verifyAndChangeEmail')->name('verifyAndChangeEmail');
+
+
+
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/product/regist', 'ProductRegistController@showRegist')->name('showRegist');
     //確認画面へを押したら
