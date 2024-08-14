@@ -23,6 +23,7 @@ return [
         'password' => 'パスワード',
         'password_confirmation' => 'パスワードの確認',
         'email' => 'メールアドレス',
+        'new_email' => 'メールアドレス'
     ],
 
     'custom' => [

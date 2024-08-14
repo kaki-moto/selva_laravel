@@ -81,7 +81,9 @@ Route::get('/product/detail/{id}', 'ProductRegistController@showDetail')->name('
 //商品レビュー一覧表示するだけ
 Route::get('/review/list/{productId}', 'ReviewRegistController@showReviewList')->name('showReviewList');
 
-
+//ログインユーザー専用のパスワード変更機能。トークンを必要とせず、認証済みユーザーのみがアクセスできるように
+Route::get('/password/change', 'MemberRegistController@showPasswordChangeForm')->name('showPasswordChangeForm');
+Route::post('/password/change', 'MemberRegistController@changePassword')->name('changePassword');
 
 
 

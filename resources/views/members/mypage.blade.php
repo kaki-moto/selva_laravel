@@ -38,7 +38,7 @@
             セキュリティのため非表示
         </label>
 
-        <form action="{{ route('password') }}" method="GET">
+        <form action="{{ route('showPasswordChangeForm') }}" method="GET">
             <input type="submit" value="パスワード変更">
         </form>
         

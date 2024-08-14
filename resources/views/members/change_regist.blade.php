@@ -46,8 +46,8 @@
         <label>
             性別
             <!-- バリュー値を男性1、女性2に。それ以外を入れるとエラーに -->
-            <input type="radio" name="gender" value=1 {{ (old('gender', $changeData['gender'] ?? '') === '1') ? 'checked' : '' }}>男性
-            <input type="radio" name="gender" value=2 {{ (old('gender', $changeData['gender'] ?? '') === '2') ? 'checked' : '' }}>女性
+            <input type="radio" name="gender" value=1 {{ (old('gender', $changeData['gender'] ?? '') == '1') ? 'checked' : '' }}>男性
+            <input type="radio" name="gender" value=2 {{ (old('gender', $changeData['gender'] ?? '') == '2') ? 'checked' : '' }}>女性
         </label>
         @error('gender')<p style="color: red;">{{ $message }}</p>@enderror
 

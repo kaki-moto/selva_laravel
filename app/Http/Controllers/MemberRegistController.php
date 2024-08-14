@@ -293,12 +293,20 @@ class MemberRegistController extends Controller
 
     public function showChangeForm()
     {
+        $user = Auth::user();
         //validationDataあれば
         // セッションからregistration_dataというキーのデータを取得（存在する場合）。session('registration_data')はバリデーションOKのデータ。
         $registrationData = session('validationData', []);
 
+        $changeData = [
+            'name_sei' => $user->name_sei,
+            'name_mei' => $user->name_mei,
+            'nickname' => $user->nickname,
+            'gender' => $user->gender,
+        ];
+
         //フォームを表示
-        return view('members.change_regist', compact('registrationData'));
+        return view('members.change_regist', compact('registrationData', 'changeData'));
     }
 
     public function changeConfirm(Request $request)
@@ -378,11 +386,7 @@ class MemberRegistController extends Controller
     {
         //新しいメールアドレスのバリデーションチェック
         $request->validate([
-            'new_email' => 'required|email|unique:members,email'
-        ], [
-            'new_email.required' => 'メールアドレスを入力してください。', // ここでのemailはemail_change.blade.phpのinputタグのname属性
-            'new_email.email' => '有効なメールアドレスを入力してください。',
-            'new_email.exists' => '登録されていないメールアドレスです。',
+            'new_email' => 'required|email|max:200|unique:members,email'
         ]);
 
         $user = Auth::user();
@@ -449,6 +453,26 @@ class MemberRegistController extends Controller
     public function showEmailChangeConfirm()
     {
         return view('members.email_change_confirm');
+    }
+
+    //追加
+    public function showPasswordChangeForm()
+    {
+        return view('members.password_change');
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|min:8|max:20|confirmed|regex:/^[a-zA-Z0-9]+$/',
+            'password_confirmation' => 'required|min:8|max:20|regex:/^[a-zA-Z0-9]+$/',
+        ]);
+    
+        $user = Auth::user();
+        $user->password = Hash::make($request->password);
+        $user->save();
+    
+        return redirect()->route('showMypage')->with('status', 'パスワードが正常に変更されました。');
     }
 
 
