@@ -27,6 +27,7 @@ return [
         'product_id' => '商品ID',
         'comment' => '商品コメント',
         'evaluation' => '商品評価',
+        'login_id' => 'ログインID'
     ],
 
     'custom' => [

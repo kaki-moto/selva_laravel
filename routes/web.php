@@ -95,5 +95,13 @@ Route::post('/password/change', 'MemberRegistController@changePassword')->name('
 //マイページの商品レビュー管理ボタン
 Route::get('/product/review/admin', 'ReviewRegistController@showMyReviewList')->name('showMyReviewList');
 
+Route::middleware(['web'])->group(function () {
+    // ルート定義
+    //管理画面
+    Route::get('/admin/login/form', 'AdministersController@showlogin')->name('admin.showlogin');
+    Route::post('/admin/login', 'AdministersController@login')->name('admin.login');
+    Route::get('/admin/top', 'AdministersController@showTop')->name('admin.top');
+});
 
+Route::get('/admin/logout', 'AdministersController@logout')->name('admin.logout');
 

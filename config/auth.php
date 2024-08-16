@@ -15,7 +15,7 @@ return [
 
     'defaults' => [
         'guard' => 'web',
-        'passwords' => 'users',
+        'passwords' => 'members', //変更
     ],
 
     /*
@@ -43,8 +43,14 @@ return [
 
         'api' => [
             'driver' => 'token',
-            'provider' => 'users',
+            'provider' => 'members', //変更
             'hash' => false,
+        ],
+
+        //追加
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'administers',
         ],
     ],
 
@@ -72,6 +78,11 @@ return [
             'driver' => 'eloquent',
             'model' => App\Member::class, //モデルをMemberモデルに
         ],
+    
+        'administers' => [
+            'driver' => 'eloquent',
+            'model' => App\Administers::class, //モデルをAdministersモデルに
+        ],
 
         // 'users' => [
         //     'driver' => 'database',
@@ -95,9 +106,15 @@ return [
     */
 
     'passwords' => [
-        'users' => [
-            'provider' => 'users',
+        'members' => [ //変更
+            'provider' => 'members', //変更
             'table' => 'password_resets',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+        'administers' => [
+            'provider' => 'administers',
+            'table' => 'admin_password_resets',
             'expire' => 60,
             'throttle' => 60,
         ],
