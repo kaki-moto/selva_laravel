@@ -27,8 +27,6 @@
     
     @endif
 
-    <!--商品総合評価-->
-
 
     <!--商品レビュー確認、id属性は二重送信防止の処理で使用-->
     <form action="{{ route('showComp') }}" id="reviewRegist" method="post">

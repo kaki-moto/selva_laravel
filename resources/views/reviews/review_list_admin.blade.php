@@ -92,7 +92,7 @@
                 <button type="submit">レビュー編集</button>
             </form>
 
-            <form action="{{ route('deleteReview') }}" method="GET">
+            <form action="{{ route('deleteReviewConfirm', ['reviewId' => $review->id]) }}" method="GET">
             <button type="submit">レビュー削除</button>
             </form>
             <hr>

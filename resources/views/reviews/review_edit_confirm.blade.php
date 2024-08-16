@@ -28,6 +28,7 @@
     @endif
 
     <!--商品総合評価-->
+    <p>総合評価 {{ str_repeat('★', $averageRating) }} {{ $averageRating }}</p>
 
 
     <!--商品レビュー確認、id属性は二重送信防止の処理で使用-->
@@ -39,7 +40,7 @@
         <p>商品コメント</p>
         <p>{{ $validatedData['comment'] }}</p>
 
-        <p><input type="submit" id="submitButton" value="登録する"></p>
+        <p><input type="submit" id="submitButton" value="更新する"></p>
     </form>
 
      <!--前に戻るボタン（商品登録フォームに戻る）-->

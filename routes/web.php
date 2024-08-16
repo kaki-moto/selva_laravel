@@ -74,7 +74,8 @@ Route::post('/review/confirm/{reviewId}', 'ReviewRegistController@confirmUpdateR
 Route::post('/review/update/{reviewId}', 'ReviewRegistController@updateReview')->name('updateReview');
 
 //レビュー削除
-Route::get('/review/delete', 'ReviewRegistController@deleteReview')->name('deleteReview');
+Route::get('/review/delete/confirm/{reviewId}', 'ReviewRegistController@deleteReviewConfirm')->name('deleteReviewConfirm');
+Route::post('/review/delete/{reviewId}', 'ReviewRegistController@deleteReview')->name('deleteReview');
 
 
 //カテゴリ

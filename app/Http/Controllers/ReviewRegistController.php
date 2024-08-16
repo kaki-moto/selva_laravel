@@ -210,9 +210,38 @@ class ReviewRegistController extends Controller
     }
 
 
-    public function deleteReview()
+    public function deleteReviewConfirm($reviewId)
     {
-        return view('reviews.review_delete');
+        //レビューを編集（DBをアップデート）
+        $review = ReviewRegist::findOrFail($reviewId);
+
+        // 現在のユーザーがこのレビューの所有者であることを確認
+        if ($review->member_id !== Auth::id()) {
+            return redirect()->route('showMyReviewList')->with('error', '不正なアクセスです。');
+        }
+
+        $product = $review->product;
+        $averageRating = ReviewRegist::where('product_id', $product->id)->avg('evaluation');
+        $averageRating = ceil($averageRating);
+        
+        return view('reviews.review_delete', compact('review', 'product', 'averageRating'));
+    }
+
+    public function deleteReview($reviewId)
+    {
+        //レビューを編集（DBをアップデート）
+        $review = ReviewRegist::findOrFail($reviewId);
+
+        // 現在のユーザーがこのレビューの所有者であることを確認
+        if ($review->member_id !== Auth::id()) {
+            return redirect()->route('showMyReviewList');
+        }
+
+        // ソフトデリート実行
+        $review->delete();
+
+        //DBからソフトデリート
+        return redirect()->route('showMyReviewList');
     }
 
 
