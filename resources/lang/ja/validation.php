@@ -23,7 +23,10 @@ return [
         'password' => 'パスワード',
         'password_confirmation' => 'パスワードの確認',
         'email' => 'メールアドレス',
-        'new_email' => 'メールアドレス'
+        'new_email' => 'メールアドレス',
+        'product_id' => '商品ID',
+        'comment' => '商品コメント',
+        'evaluation' => '商品評価',
     ],
 
     'custom' => [

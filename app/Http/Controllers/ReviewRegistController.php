@@ -123,4 +123,98 @@ class ReviewRegistController extends Controller
 
         return view('reviews.review_list', compact('product', 'reviews', 'totalReviews', 'averageRating') );
     }
+
+    public function showMyReviewList(Request $request)
+    {
+        $user = Auth::user();
+
+        // ユーザーの総レビュー数を取得
+        $totalReviews = ReviewRegist::where('member_id', $user->id)->count();
+
+        // ユーザーのレビューを取得し、関連する商品情報も一緒に取得
+        $reviews = ReviewRegist::where('member_id', $user->id)
+        ->with('product.category', 'product.subcategory')
+        ->orderBy('created_at', 'desc')
+        ->paginate(5);
+
+        return view('reviews.review_list_admin', compact('reviews', 'totalReviews'));
+    }
+
+    public function editReview($reviewId)
+    {
+        $review = ReviewRegist::findOrFail($reviewId);
+    
+        // 現在のユーザーがこのレビューの所有者であることを確認
+        if ($review->member_id !== Auth::id()) {
+            return redirect()->route('showMyReviewList')->with('error', '不正なアクセスです。');
+        }
+    
+        $product = $review->product;
+        $averageRating = ReviewRegist::where('product_id', $product->id)->avg('evaluation');
+        $averageRating = ceil($averageRating);
+
+        //確認画面から戻った場合の処理
+        $validatedData = session()->get('validatedData', []);
+
+    
+        return view('reviews.review_edit', compact('review', 'product', 'averageRating'));
+    }
+
+    public function confirmUpdateReview(Request $request, $reviewId)
+    {
+        $review = ReviewRegist::findOrFail($reviewId);
+
+        $product = $review->product;
+        $averageRating = ReviewRegist::where('product_id', $product->id)->avg('evaluation');
+        $averageRating = ceil($averageRating);
+
+        //フォームの内容をバリデーション
+        $validatedData = $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'evaluation' => 'required|in:1,2,3,4,5', //review_registのname属性の値
+            'comment' => 'required|max:500',
+        ],[
+            'product_id.required' => '商品IDが必要です。',
+            'product_id.exists' => '指定された商品が存在しません。',
+            'evaluation.required' => '商品評価を選択してください。',
+            'evaluation.in' => '無効な商品評価が選択されました。',
+            'comment.required' => '商品コメントを入力してください。',
+            'comment.max' => '商品コメントは500文字以内で入力してください。'
+        ]);
+
+        $request->session()->put('validatedData', $validatedData);
+
+        return view('reviews.review_edit_confirm', compact('review', 'product', 'averageRating', 'validatedData'));
+    }
+
+    public function updateReview(Request $request, $reviewId)
+    {
+        //レビューを編集（DBをアップデート）
+        $review = ReviewRegist::findOrFail($reviewId);
+
+        // 現在のユーザーがこのレビューの所有者であることを確認
+        if ($review->member_id !== Auth::id()) {
+            return redirect()->route('showMyReviewList')->with('error', '不正なアクセスです。');
+        }
+
+        // セッションからvalidatedDataを取得、なければエラー
+        $validatedData = $request->session()->get('validatedData');
+        if (!$validatedData) {
+            // セッションにデータがない場合の処理
+            return redirect()->back()->with('error', 'セッションデータが見つかりません。もう一度やり直してください。');
+        }
+
+        $review->update($validatedData);
+
+        return redirect()->route('showMyReviewList');
+    }
+
+
+    public function deleteReview()
+    {
+        return view('reviews.review_delete');
+    }
+
+
+    
 }

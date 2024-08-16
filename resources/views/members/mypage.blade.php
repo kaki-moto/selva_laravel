@@ -52,6 +52,10 @@
             <input type="submit" value="メールアドレス変更">
         </form>
 
+        <form action="{{ route('showMyReviewList') }}" method="GET">
+            <input type="submit" value="商品レビュー管理">
+        </form>
+
         <form action="{{ route('showWithdrawal') }}" method="GET">
             <input type="submit" value="退会">
         </form>

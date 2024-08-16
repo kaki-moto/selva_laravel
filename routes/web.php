@@ -52,6 +52,7 @@ Route::group(['middleware' => 'auth'], function () {
     //登録完了ボタンを押したら
     Route::post('/product/regist', 'ProductRegistController@productRegist')->name('product_regist');
     
+    //レビュー登録
     //登録フォーム表示するだけ
     Route::get('/review/regist/{productId}', 'ReviewRegistController@showRegist')->name('showRegistReview');
     //バリデーションして確認画面を表示
@@ -67,8 +68,13 @@ Route::group(['middleware' => 'auth'], function () {
 
 });
 
+//レビュー編集
+Route::get('/review/edit/{reviewId}', 'ReviewRegistController@editReview')->name('editReview');
+Route::post('/review/confirm/{reviewId}', 'ReviewRegistController@confirmUpdateReview')->name('confirmUpdateReview');
+Route::post('/review/update/{reviewId}', 'ReviewRegistController@updateReview')->name('updateReview');
 
-
+//レビュー削除
+Route::get('/review/delete', 'ReviewRegistController@deleteReview')->name('deleteReview');
 
 
 //カテゴリ
@@ -85,7 +91,8 @@ Route::get('/review/list/{productId}', 'ReviewRegistController@showReviewList')-
 Route::get('/password/change', 'MemberRegistController@showPasswordChangeForm')->name('showPasswordChangeForm');
 Route::post('/password/change', 'MemberRegistController@changePassword')->name('changePassword');
 
-
+//マイページの商品レビュー管理ボタン
+Route::get('/product/review/admin', 'ReviewRegistController@showMyReviewList')->name('showMyReviewList');
 
 
 
