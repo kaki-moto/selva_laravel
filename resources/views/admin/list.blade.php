@@ -58,6 +58,11 @@
     </header>
 
     <main>
+
+    <form action="{{ route('admin.showForm') }}" method="GET">
+            <button type="submit">会員登録</button>
+    </form>
+
     <!-- 会員検索 -->
     <form action="{{ route('admin.showList') }}" method="GET">
         <table border="1" width="70%">
@@ -102,6 +107,7 @@
                     {{ $sort == 'id' ? ($direction == 'asc' ? '▼' : '▲') : '' }}
                     </a>
                 </th>
+                <th bgcolor="gray">編集</th>
             </tr>
             @foreach($users as $user)
             <tr>
@@ -109,7 +115,10 @@
                 <td>{{ $user->name_sei }} {{ $user->name_mei }}</td>
                 <td>{{ $user->email }}</td>
                 <td>{{ $user->gender == 1 ? '男性' : '女性' }}</td>
-                <td>{{ $user->created_at }}<td>
+                <td>{{ $user->created_at }}</td>
+                <td>
+                    <a href="{{ route('admin.showForm', ['id' => $user->id]) }}">編集</a>
+                </td>
             </tr>
             @endforeach
         </table>

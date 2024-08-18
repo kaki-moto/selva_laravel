@@ -108,3 +108,9 @@ Route::get('/admin/logout', 'AdministersController@logout')->name('admin.logout'
 
 Route::get('/admin/member/list', 'AdministersController@showList')->name('admin.showList');
 
+Route::get('/admin/member/regist/form', 'AdministersController@showForm')->name('admin.showForm');
+Route::post('/admin/member/regist/confirm', 'AdministersController@registConfirm')->name('admin.registConfirm');
+Route::post('/admin/member/regist/complete', 'AdministersController@registComp')->name('admin.registComp');
+
+Route::post('/admin/member/update/confirm/{id}', 'AdministersController@updateConfirm')->name('admin.updateConfirm');
+Route::post('/admin/member/update/complete/{id}', 'AdministersController@updateComp')->name('admin.updateComp');
