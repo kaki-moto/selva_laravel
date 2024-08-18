@@ -15,5 +15,11 @@
         @endauth
     </header>
 
+    <main>
+        <form action="{{ route('admin.showList') }}" method="GET">
+            <button type="submit">会員一覧</button>
+        </form>
+    </main>
+
 </body>
 </html>

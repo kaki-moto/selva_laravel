@@ -105,3 +105,6 @@ Route::middleware(['web'])->group(function () {
 
 Route::get('/admin/logout', 'AdministersController@logout')->name('admin.logout');
 
+
+Route::get('/admin/member/list', 'AdministersController@showList')->name('admin.showList');
+

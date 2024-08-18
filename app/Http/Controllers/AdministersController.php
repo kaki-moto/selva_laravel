@@ -7,6 +7,7 @@ use App\Administers; // Administersモデルのインポート
 use Illuminate\Support\Facades\Auth; // Authファサードのインポートを追加、ログイン？ログアウトの時、再設定の時使う
 use Illuminate\Support\Facades\Validator; //Validatorクラスを使用するためインポート
 use Illuminate\Support\Facades\Hash;
+use App\Member;
 
 
 class AdministersController extends Controller
@@ -68,4 +69,47 @@ class AdministersController extends Controller
 
         return redirect()->route('admin.showlogin');
     }
+
+    public function showList(Request $request)
+    {
+        // ソートのパラメータを取得（デフォルトはidで降順）
+        $sort = $request->input('sort', 'id');
+        $direction = $request->input('direction', 'desc');
+
+        // 検索条件の取得
+        $searchId = $request->input('search_id');
+        $searchGender = $request->input('search_gender', []);
+        $searchKeyword = $request->input('search_keyword');
+
+        // クエリビルダーを使用して検索条件に基づくフィルタリングを実行
+        $query = Member::query();
+
+        if (!empty($searchId)) {
+            $query->where('id', $searchId);
+        }
+
+        if (!empty($searchGender)) {
+            $query->whereIn('gender', $searchGender);
+        }
+
+        if (!empty($searchKeyword)) {
+            $query->where(function($q) use ($searchKeyword) {
+                $q->where('name_sei', 'like', '%' . $searchKeyword . '%')
+                ->orWhere('name_mei', 'like', '%' . $searchKeyword . '%')
+                ->orWhere('email', 'like', '%' . $searchKeyword . '%');
+            });
+        }
+
+        // IDの降順で並び替える
+        //$users = $query->orderBy('id', 'desc')->paginate(10);
+
+        // 指定されたカラムで昇順・降順に並び替える
+        $users = $query->orderBy($sort, $direction)->paginate(10);
+
+
+        // ビューにデータを渡す
+        return view('admin.list', compact('users', 'searchId', 'searchGender', 'searchKeyword', 'sort', 'direction'));
+    }
+
+
 }
