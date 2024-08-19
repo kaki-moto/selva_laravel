@@ -137,6 +137,7 @@ class AdministersController extends Controller
                 'nickname' => $member->nickname,
                 'gender' => $member->gender,
                 'email' => $member->email,
+                'id' => $member->id, // IDも
             ];
         } else {
             // 新規登録時やエラー時はセッションデータを使用
@@ -145,7 +146,7 @@ class AdministersController extends Controller
 
         // リクエストからデータを取得（確認画面から戻ってきた場合）
         $registrationData = array_merge($registrationData, $request->only([
-            'name_sei', 'name_mei', 'nickname', 'gender', 'email'
+            'name_sei', 'name_mei', 'nickname', 'gender', 'email', 'id'
         ]));
 
         return view('admin.member_form', array_merge($data, ['registrationData' => $registrationData]));
@@ -300,5 +301,27 @@ class AdministersController extends Controller
 
         return redirect()->route('admin.showList');
     }
+
+    public function showDetail($id)
+    {
+        $user = Member::findOrFail($id);
+        return view('admin.detail', [
+            'user' => $user,
+        ]);
+    }
+
+    public function deleteMember(Request $request)
+    {
+        $id = $request->input('id');
+        $member = Member::findOrFail($id);
+    
+        try {
+            $member->delete();
+            return redirect()->route('admin.showList')->with('success', '会員を削除しました。');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.showList')->with('error', '会員の削除に失敗しました。');
+        }
+    }
+    
 
 }

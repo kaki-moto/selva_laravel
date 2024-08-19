@@ -3,43 +3,40 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>会員編集</title>
+    <title>会員詳細</title>
 </head>
 <body>
     <header>
-        <h3>会員編集</h3>
+        <h3>会員詳細</h3>
         <form action="{{ route('admin.showList') }}" method="GET">
             <button type="submit">一覧に戻る</button>
         </form>
     </header>
 
-    <form action="{{ route('admin.updateComp', ['id' => $member->id]) }}" method="POST" id="registrationForm">
-        @csrf
-
         <label>
             ID
-            {{ $member->id }}
+            {{ $user->id }}
         </label>
 
         <br>
 
         <label>
             氏名
-            {{ $validatedData['name_sei'] }}{{ $validatedData['name_mei'] }}
+            {{ $user->name_sei }}{{ $user->name_mei }}
         </label>
 
         <br>
 
         <label>
             ニックネーム
-            {{ $validatedData['nickname'] }}
+            {{ $user->nickname }}
         </label>
 
         <br>
 
         <label>
             性別
-            {{ config('master.gender.' . $validatedData['gender'], '不明')}}
+            {{ config('master.gender.' . $user->gender, '不明')}}
         </label>
 
         <br>
@@ -53,24 +50,20 @@
 
         <label>
             メールアドレス
-            {{ $validatedData['email'] }}
+            {{ $user->email }}
         </label>
-        
-        <input type="hidden" name="form_token" value="{{ $token }}">
-        <p><input type="submit" id="submitButton" value="編集完了"></p>
+
+    <form action="{{ route('admin.showForm', ['id' => $user->id]) }}" method="GET">
+        <input type="hidden" name="id" value="{{ $user->id }}">
+        <button type="submit">編集</button>
+    </form>
+
+    <form action="{{ route('admin.deleteMember') }}" method="GET">
+        <input type="hidden" name="id" value="{{ $user->id }}">
+        <button type="submit">削除</button>
     </form>
 
 
-    <form action="{{ route('admin.showForm', ['id' => $member->id]) }}" method="GET">
-    @csrf
-    <input type="hidden" name="id" value="{{ $member->id }}">
-    @foreach($validatedData as $key => $value)
-        @if($key !== 'password' && $key !== 'password_confirmation')
-            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-        @endif
-    @endforeach
-    <button type="submit">前に戻る</button>
-    </form>
 
     <script>
    document.getElementById('registrationForm').addEventListener('submit', function() {

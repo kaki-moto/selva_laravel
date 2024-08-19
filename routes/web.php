@@ -114,3 +114,7 @@ Route::post('/admin/member/regist/complete', 'AdministersController@registComp')
 
 Route::post('/admin/member/update/confirm/{id}', 'AdministersController@updateConfirm')->name('admin.updateConfirm');
 Route::post('/admin/member/update/complete/{id}', 'AdministersController@updateComp')->name('admin.updateComp');
+
+Route::get('/admin/member/detail/{id}', 'AdministersController@showDetail')->name('admin.showDetail');
+
+Route::get('/admin/member/delete', 'AdministersController@deleteMember')->name('admin.deleteMember');

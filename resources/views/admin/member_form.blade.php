@@ -21,6 +21,10 @@
     
     <form action="{{ $formAction }}" method="post">
         @csrf
+        
+        @if($isEdit)
+        <input type="hidden" name="id" value="{{ $member->id }}">
+        @endif
 
         @if($isEdit)
             <label>
