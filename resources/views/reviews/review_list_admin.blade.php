@@ -86,7 +86,7 @@
             <!-- 登録した評価 -->
             <p>{{ str_repeat('★', $review->evaluation) }} {{ $review->evaluation }}</p>
             <!-- レビューコメント（16文字以上は・・・）Str::limit()関数を使用して、コメントを16文字で切り詰め -->
-            <p>{{ mb_strlen($review->comment) > 16 ? mb_substr($review->comment, 0, 15) . '...' : $review->comment }}</p>
+            <p>{{ mb_strlen($review->comment) >= 16 ? mb_substr($review->comment, 0, 15) . '...' : $review->comment }}</p>
 
             <form action="{{ route('editReview', ['reviewId' => $review->id]) }}" method="GET">
                 <button type="submit">レビュー編集</button>
