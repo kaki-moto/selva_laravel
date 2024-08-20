@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth; // Authファサードのインポートを
 use Illuminate\Support\Facades\Validator; //Validatorクラスを使用するためインポート
 use Illuminate\Support\Facades\Hash;
 use App\Member;
+use App\ProductCategory;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -230,28 +231,28 @@ class AdministersController extends Controller
                         ],        
         ]);
 
-        // パスワードが入力された場合のみ、パスワードのバリデーションルールを追加
+        // パスワードが入力された場合のみ、パスワードのバリデーションルールを追加    
         if ($request->filled('password')) {
-            $validatedData['password'] = [
-                'required',
-                'min:8',
-                'max:20',
-                'confirmed',
-                'regex:/^[a-zA-Z0-9]+$/'
-            ];
-            $validatedData['password_confirmation'] = 'required|min:8|max:20|regex:/^[a-zA-Z0-9]+$/';
+            $request->validate([
+                'password' => [
+                    'required',
+                    'min:8',
+                    'max:20',
+                    'confirmed',
+                    'regex:/^[a-zA-Z0-9]+$/'
+                ],
+                'password_confirmation' => 'required'
+            ]);
+
+            // パスワードがバリデーションに成功した場合、ハッシュ化して `$validatedData` に保存
+            $validatedData['password'] = bcrypt($request->input('password'));
+        } else {
+            // パスワードが入力されていない場合は、既存のパスワードを使用
+            $validatedData['password'] = $member->password;
         }
 
         // バリデーション成功時の処理
         $request->session()->put('registrationData', $validatedData);
-
-        // パスワードが入力された場合のみ、ハッシュ化して保存
-        if ($request->filled('password')) {
-            $validatedData['password'] = bcrypt($validatedData['password']);
-        } else {
-            // パスワードが入力されていない場合は、DBにある既存のパスワードを使用
-            $validatedData['password'] = $member->password;
-        }
 
         //二重送信防止
         $token = Str::random(40);
@@ -322,6 +323,95 @@ class AdministersController extends Controller
             return redirect()->route('admin.showList')->with('error', '会員の削除に失敗しました。');
         }
     }
+
+    public function showCategoryList(Request $request)
+    {
+        // ソートのパラメータを取得（デフォルトはidで降順）
+        $sort = $request->input('sort', 'id');
+        $direction = $request->input('direction', 'desc');
+
+        // 検索条件の取得
+        $searchId = $request->input('search_id');
+        $searchKeyword = $request->input('search_keyword');
+
+        // クエリビルダーを使用して検索条件に基づくフィルタリングを実行
+        $query = ProductCategory::query();
+
+        if (!empty($searchId)) {
+            $query->where('id', $searchId);
+        }
+
+        if (!empty($searchKeyword)) {
+            $query->where(function($q) use ($searchKeyword) {
+                $q->where('name', 'like', '%' . $searchKeyword . '%')
+                  ->orWhereHas('subcategories', function($subq) use ($searchKeyword) {
+                      $subq->where('name', 'like', '%' . $searchKeyword . '%');
+                  });
+            });
+        }
+
+        // 指定されたカラムで昇順・降順に並び替える
+        $categories = $query->orderBy($sort, $direction)->paginate(10);
+
+        // ビューにデータを渡す
+        return view('admin.category_list', compact('categories', 'searchId', 'searchKeyword', 'sort', 'direction'));
+    }
+
+    public function categoryForm(Request $request)
+    {
+        //idがあれば編集、なければ新規カテゴリ登録に切り替える。
+        $id = $request->query('id');
+        $category = $id ? ProductCategory::findOrFail($id) : null; 
+        $isEdit = $id !== null; //idがない場合
+        
+        $data = [
+            'title' => $isEdit ? 'カテゴリ編集' : 'カテゴリ登録',
+            'formAction' => $isEdit ? route('admin.updateCategoryConfirm', ['id' => $id]) : route('admin.registCategoryConfirm'),
+            'isEdit' => $isEdit,
+            'category' => $category,
+        ];
+
+        // 編集時は既存のカテゴリ情報を使用
+        if ($isEdit && $category) {
+            $registrationData = [
+                'product_category' => $category->name,
+                'product_subcategories' => $category->subcategories->pluck('name')->toArray(),
+            ];
+        } else {
+            // 新規登録時やエラー時はセッションデータを使用
+            $registrationData = session('registrationData', []);
+        }
+
+        return view('admin.category_form', array_merge($data, ['registrationData' => $registrationData]));
+    }    
     
+    public function registCategoryConfirm(Request $request)
+    {
+        //バリデーション
+        return view('admin.regist_category_confirm');
+    }
+
+    public function registCategoryComp(Request $request)
+    {
+        //DBに登録
+        return redirect()->route('admin.showCategoryList');
+    }
+
+    public function updateCategoryConfirm(Request $request)
+    {
+        //バリデーション
+        return view('admin.update_category_confirm');
+    }
+
+    public function updateCategoryComp(Request $request)
+    {
+        //DBに登録
+        return redirect()->route('admin.showCategoryList');
+    }
+
+    
+
+
+
 
 }

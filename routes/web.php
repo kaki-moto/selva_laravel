@@ -118,3 +118,14 @@ Route::post('/admin/member/update/complete/{id}', 'AdministersController@updateC
 Route::get('/admin/member/detail/{id}', 'AdministersController@showDetail')->name('admin.showDetail');
 
 Route::get('/admin/member/delete', 'AdministersController@deleteMember')->name('admin.deleteMember');
+
+Route::get('/admin/category/list', 'AdministersController@showCategoryList')->name('admin.showCategoryList');
+
+Route::get('/admin/category/form', 'AdministersController@categoryForm')->name('admin.categoryForm');
+
+Route::post('/admin/category/regist/confirm', 'AdministersController@registCategoryConfirm')->name('admin.registCategoryConfirm');
+Route::post('/admin/category/regist/complete', 'AdministersController@registCategoryComp')->name('admin.registCategoryComp');
+
+Route::post('/admin/category/update/confirm', 'AdministersController@updateCategoryConfirm')->name('admin.updateCategoryConfirm');
+Route::post('/admin/category/update/complete', 'AdministersController@updateCategoryComp')->name('admin.updateCategoryComp');
+
