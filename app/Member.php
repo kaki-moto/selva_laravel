@@ -33,4 +33,19 @@ class Member extends Authenticatable //DBのmembersテーブルからのデー�
         return $this->name_sei . ' ' . $this->name_mei;
     }
 
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($member) {
+            $member->reviews()->delete();
+        });
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(ReviewRegist::class, 'member_id');
+    }
+
 }

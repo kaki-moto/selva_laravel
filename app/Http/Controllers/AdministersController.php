@@ -313,14 +313,17 @@ class AdministersController extends Controller
 
     public function deleteMember(Request $request)
     {
-        $id = $request->input('id');
-        $member = Member::findOrFail($id);
+        //会員情報と、それに紐づくレビューも削除
+        $id = $request->input('id'); //リクエストからidというキーに対応する値を取得、$idに格納
+        $member = Member::findOrFail($id); //idに基づき、Memberモデルのレコードを取得、存在しない場合は404エラー
     
         try {
+            \DB::transaction(function () use ($member) {
             $member->delete();
-            return redirect()->route('admin.showList')->with('success', '会員を削除しました。');
+            });
+            return redirect()->route('admin.showList');
         } catch (\Exception $e) {
-            return redirect()->route('admin.showList')->with('error', '会員の削除に失敗しました。');
+            return redirect()->route('admin.showList');
         }
     }
 
