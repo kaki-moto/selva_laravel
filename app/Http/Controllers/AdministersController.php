@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator; //Validatorクラスを使用するた
 use Illuminate\Support\Facades\Hash;
 use App\Member;
 use App\ProductCategory;
+use App\ProductSubcategory;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -112,9 +113,6 @@ class AdministersController extends Controller
         // ビューにデータを渡す
         return view('admin.list', compact('users', 'searchId', 'searchGender', 'searchKeyword', 'sort', 'direction'));
     }
-
-
-
 
 
     public function showForm(Request $request)
@@ -365,7 +363,7 @@ class AdministersController extends Controller
         //idがあれば編集、なければ新規カテゴリ登録に切り替える。
         $id = $request->query('id');
         $category = $id ? ProductCategory::findOrFail($id) : null; 
-        $isEdit = $id !== null; //idがない場合
+        $isEdit = $id !== null;
         
         $data = [
             'title' => $isEdit ? 'カテゴリ編集' : 'カテゴリ登録',
@@ -373,48 +371,217 @@ class AdministersController extends Controller
             'isEdit' => $isEdit,
             'category' => $category,
         ];
-
+    
+        // セッションから一時保存データを取得
+        $tempData = $request->session()->get('temp_category_data', []);
+    
         // 編集時は既存のカテゴリ情報を使用
         if ($isEdit && $category) {
             $registrationData = [
-                'product_category' => $category->name,
-                'product_subcategories' => $category->subcategories->pluck('name')->toArray(),
+                'product_category' => $tempData['product_category'] ?? $category->name,
+                'product_subcategories' => $tempData['product_subcategory'] ?? $category->subcategories->pluck('name')->toArray(),
             ];
         } else {
-            // 新規登録時やエラー時はセッションデータを使用
-            $registrationData = session('registrationData', []);
+            // 新規登録時やエラー時は一時保存データを使用
+            $registrationData = [
+                'product_category' => $tempData['product_category'] ?? '',
+                'product_subcategories' => $tempData['product_subcategory'] ?? [],
+            ];
         }
-
+    
+        // セッションから一時保存データを削除
+        $request->session()->forget('temp_category_data');
+        
         return view('admin.category_form', array_merge($data, ['registrationData' => $registrationData]));
     }    
     
     public function registCategoryConfirm(Request $request)
     {
-        //バリデーション
-        return view('admin.regist_category_confirm');
-    }
+        // 入力データを一時保存
+        $request->session()->flash('temp_category_data', $request->all());
 
-    public function registCategoryComp(Request $request)
-    {
-        //DBに登録
-        return redirect()->route('admin.showCategoryList');
+        // バリデーションルールを定義
+        $rules = [
+            'product_category' => 'required|max:20',
+            'product_subcategory' => 'required|array|min:1|max:10',
+            'product_subcategory.0' => 'required|max:20',
+        ];
+
+        // 2つ目以降の小カテゴリのバリデーションルールを追加
+        for ($i = 1; $i < 10; $i++) {
+            $rules["product_subcategory.{$i}"] = 'nullable|max:20';
+        }
+
+        // バリデーションメッセージをカスタマイズ
+        $messages = [
+            'product_subcategory.required' => '少なくとも1つの商品小カテゴリを入力してください。',
+            'product_subcategory.min' => '少なくとも1つの商品小カテゴリを入力してください。',
+            'product_subcategory.max' => '商品小カテゴリは最大10個まで登録可能です。',
+            'product_subcategory.0.max' => '商品小カテゴリは20文字以内で入力してください。',
+            'product_subcategory.*.max' => '商品小カテゴリは20文字以内で入力してください。',
+        ];
+
+        // バリデーションを実行
+        $validatedData = $request->validate($rules, $messages);
+
+        // 空の小カテゴリを除外
+        $subcategories = array_filter($validatedData['product_subcategory'], function($value) {
+            return $value !== null && $value !== '';
+        });
+
+        // カテゴリ情報を作成
+        $category = [
+            'name' => $validatedData['product_category'],
+            'subcategories' => $subcategories,
+        ];
+
+        $request->session()->put('registrationData', $category); //追加
+
+        return view('admin.regist_category_confirm', [
+            'category' => $category,
+            'category' => (object)$category,
+        ]);
     }
 
     public function updateCategoryConfirm(Request $request)
     {
-        //バリデーション
-        return view('admin.update_category_confirm');
+        // 入力データを一時保存
+        $request->session()->flash('temp_category_data', $request->all());
+
+        $id = $request->input('id');
+        $category = ProductCategory::findOrFail($id);
+        //$updatedCategory = ...; // 編集されたカテゴリ情報を取得
+
+        // バリデーション
+        $rules = [
+            'product_category' => 'required|max:20',
+            'product_subcategory' => 'required|array|min:1|max:10',
+            'product_subcategory.0' => 'required|max:20',
+        ];
+
+        // 2つ目以降の小カテゴリのバリデーションルールを追加
+        for ($i = 1; $i < 10; $i++) {
+            $rules["product_subcategory.{$i}"] = 'nullable|max:20';
+        }
+
+        // バリデーションメッセージをカスタマイズ
+        $messages = [
+            'product_subcategory.required' => '少なくとも1つの商品小カテゴリを入力してください。',
+            'product_subcategory.min' => '少なくとも1つの商品小カテゴリを入力してください。',
+            'product_subcategory.max' => '商品小カテゴリは最大10個まで登録可能です。',
+            'product_subcategory.0.max' => '商品小カテゴリは20文字以内で入力してください。',
+            'product_subcategory.*.max' => '商品小カテゴリは20文字以内で入力してください。',
+        ];
+
+        // バリデーションを実行
+        $validatedData = $request->validate($rules, $messages);
+
+        // 空の小カテゴリを除外
+        $subcategories = array_filter($validatedData['product_subcategory'], function($value) {
+            return $value !== null && $value !== '';
+        });
+
+        // カテゴリ情報を更新
+        $updatedCategory = [
+            'id' => $id,
+            'name' => $validatedData['product_category'],
+            'subcategories' => $subcategories,
+        ];
+
+        // セッションにデータを保存
+        $request->session()->put('updateCategoryData', $updatedCategory);
+
+        // 確認画面にデータを渡す
+        return view('admin.update_category_confirm', [
+            'category' => $category,  // モデルインスタンスをそのまま渡す
+            'updatedCategory' => (object)$updatedCategory,  // 更新されたデータ
+        ]);
+    }
+
+    public function registCategoryComp(Request $request)
+    {
+        // カテゴリ情報をリクエストから取得
+        $categoryName = $request->input('category_name');
+        $subcategories = $request->input('subcategories', []);
+
+        if (!$categoryName || empty($subcategories)) {
+            return redirect()->route('admin.categoryForm'); // カテゴリ情報不足
+        }
+
+        // 二重送信防止のトークンチェック
+        if ($request->session()->get('form_token') !== $request->input('form_token')) {
+            return redirect()->route('admin.showCategoryList')->with('error', '不正な操作が行われました。');
+        }
+        // トークンが正しければ、トークンを無効化（セッションから削除）
+        $request->session()->forget('form_token');
+
+        try {
+            \DB::transaction(function () use ($categoryName, $subcategories) {
+                // 新しい ProductCategory インスタンスを作成し、カテゴリ名を設定
+                $category = new ProductCategory();
+                $category->name = $categoryName;
+                $category->save();
+
+                // 小カテゴリを保存
+                foreach ($subcategories as $subcategoryName) {
+                    $category->subcategories()->create([
+                        'name' => $subcategoryName,
+                        'product_category_id' => $category->id,
+                    ]);
+                }
+            });
+
+            return redirect()->route('admin.showCategoryList'); // 登録成功
+
+        } catch (\Exception $e) {
+            \Log::error($e->getMessage());
+            return redirect()->route('admin.categoryForm'); // 登録中にエラー
+        }
     }
 
     public function updateCategoryComp(Request $request)
     {
-        //DBに登録
-        return redirect()->route('admin.showCategoryList');
+        $updateData = $request->session()->get('updateCategoryData');
+
+        if (!$updateData) {
+            return redirect()->route('admin.showCategoryList')->with('error', 'カテゴリ情報が見つかりません。');
+        }
+
+        // 二重送信防止のトークンチェック
+        if ($request->session()->get('form_token') !== $request->input('form_token')) {
+            return redirect()->route('admin.showCategoryList')->with('error', '不正な操作が行われました。');
+        }
+        // トークンが正しければ、トークンを無効化（セッションから削除）
+        $request->session()->forget('form_token');
+
+        try {
+            \DB::transaction(function () use ($updateData) {
+                $category = ProductCategory::findOrFail($updateData['id']);
+                
+                // 大カテゴリ名が変更された場合のみ更新
+                if ($category->name !== $updateData['name']) {
+                    $category->name = $updateData['name'];
+                    $category->save();
+                }
+
+                // 既存の小カテゴリをすべて削除
+                $category->subcategories()->delete();
+
+                // 新しい小カテゴリを登録
+                foreach ($updateData['subcategories'] as $subcategoryName) {
+                    $category->subcategories()->create([
+                        'name' => $subcategoryName,
+                    ]);
+                }
+            });
+
+            $request->session()->forget('updateCategoryData');
+            return redirect()->route('admin.showCategoryList')->with('success', 'カテゴリを更新しました。');
+
+        } catch (\Exception $e) {
+            \Log::error($e->getMessage());
+            return redirect()->route('admin.categoryForm')->with('error', 'カテゴリの更新中にエラーが発生しました。');
+        }
     }
-
-    
-
-
-
 
 }

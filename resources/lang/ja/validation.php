@@ -27,7 +27,10 @@ return [
         'product_id' => '商品ID',
         'comment' => '商品コメント',
         'evaluation' => '商品評価',
-        'login_id' => 'ログインID'
+        'login_id' => 'ログインID',
+        'product_category' => '商品大カテゴリ',
+        'product_subcategories' => '商品小カテゴリ',
+        'product_subcategory.0' => '商品小カテゴリ',
     ],
 
     'custom' => [

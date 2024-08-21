@@ -127,5 +127,4 @@ Route::post('/admin/category/regist/confirm', 'AdministersController@registCateg
 Route::post('/admin/category/regist/complete', 'AdministersController@registCategoryComp')->name('admin.registCategoryComp');
 
 Route::post('/admin/category/update/confirm', 'AdministersController@updateCategoryConfirm')->name('admin.updateCategoryConfirm');
-Route::post('/admin/category/update/complete', 'AdministersController@updateCategoryComp')->name('admin.updateCategoryComp');
-
+Route::post('/admin/category/update/complete/{id}', 'AdministersController@updateCategoryComp')->name('admin.updateCategoryComp');
