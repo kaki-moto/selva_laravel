@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Member;
 use App\ProductCategory;
 use App\ProductSubcategory;
+use App\Product;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
@@ -605,6 +606,36 @@ class AdministersController extends Controller
             \Log::error($e->getMessage());
             return redirect()->route('admin.showCategoryList')->with('error', 'カテゴリの削除中にエラーが発生しました。');
         }
+    }
+
+    public function productList(Request $request)
+    {
+        // ソートのパラメータを取得（デフォルトはidで降順）
+        $sort = $request->input('sort', 'id');
+        $direction = $request->input('direction', 'desc');
+
+        // 検索条件の取得
+        $searchId = $request->input('search_id'); //seach_idは検索のinputタグのname属性
+        $searchKeyword = $request->input('search_keyword');
+
+        // クエリビルダーを使用して検索条件に基づくフィルタリングを実行
+        $query = Product::query();
+
+        if (!empty($searchId)) {
+            $query->where('id', $searchId);
+        }
+
+        if (!empty($searchKeyword)) {
+            $query->where(function($q) use ($searchKeyword) {
+                $q->where('name', 'like', '%' . $searchKeyword . '%')
+                ->orWhere('product_content', 'like', '%' . $searchKeyword . '%');
+            });
+        }
+
+        // 指定されたカラムで昇順・降順に並び替える
+        $products = $query->orderBy($sort, $direction)->paginate(10);
+
+        return view('admin.product_list', compact('products', 'searchId', 'searchKeyword', 'sort', 'direction'));
     }
 
 }

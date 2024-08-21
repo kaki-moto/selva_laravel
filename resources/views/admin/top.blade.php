@@ -22,6 +22,9 @@
         <form action="{{ route('admin.showCategoryList') }}" method="GET">
             <button type="submit">商品カテゴリ一覧</button>
         </form>
+        <form action="{{ route('admin.productList') }}" method="GET">
+            <button type="submit">商品一覧</button>
+        </form>
     </main>
 
 </body>

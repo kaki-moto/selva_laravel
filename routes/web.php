@@ -103,8 +103,9 @@ Route::middleware(['web'])->group(function () {
     Route::get('/admin/top', 'AdministersController@showTop')->name('admin.top');
 });
 
-Route::get('/admin/logout', 'AdministersController@logout')->name('admin.logout');
 
+
+Route::get('/admin/logout', 'AdministersController@logout')->name('admin.logout');
 
 Route::get('/admin/member/list', 'AdministersController@showList')->name('admin.showList');
 
@@ -131,3 +132,5 @@ Route::post('/admin/category/update/complete/{id}', 'AdministersController@updat
 
 Route::get('/admin/category/detail/{id}', 'AdministersController@categoryDetail')->name('admin.categoryDetail');
 Route::post('/admin/category/delete/{id}', 'AdministersController@deleteCategory')->name('admin.deleteCategory');
+
+Route::get('/admin/product/list', 'AdministersController@productList')->name('admin.productList');
