@@ -128,3 +128,6 @@ Route::post('/admin/category/regist/complete', 'AdministersController@registCate
 
 Route::post('/admin/category/update/confirm', 'AdministersController@updateCategoryConfirm')->name('admin.updateCategoryConfirm');
 Route::post('/admin/category/update/complete/{id}', 'AdministersController@updateCategoryComp')->name('admin.updateCategoryComp');
+
+Route::get('/admin/category/detail/{id}', 'AdministersController@categoryDetail')->name('admin.categoryDetail');
+Route::post('/admin/category/delete/{id}', 'AdministersController@deleteCategory')->name('admin.deleteCategory');

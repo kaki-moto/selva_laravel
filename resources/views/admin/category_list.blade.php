@@ -105,14 +105,20 @@
                     </a>
                 </th>
                 <th bgcolor="gray">編集</th>
+                <th bgcolor="gray">詳細</th>
             </tr>
             @foreach($categories as $category)
             <tr>
                 <td>{{ $category->id }}</td>
-                <td>{{ $category->name }}</td>
+                <td>
+                    <a href="{{ route('admin.categoryDetail', ['id' => $category->id]) }}">{{ $category->name }}</a>
+                </td>
                 <td>{{ $category->created_at }}</td>
                 <td>
                     <a href="{{ route('admin.categoryForm', ['id' => $category->id]) }}">編集</a>
+                </td>
+                <td>
+                    <a href="{{ route('admin.categoryDetail', ['id' => $category->id]) }}">詳細</a>
                 </td>
             </tr>
             @endforeach

@@ -12,6 +12,7 @@ use App\ProductCategory;
 use App\ProductSubcategory;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 
 class AdministersController extends Controller
@@ -391,7 +392,7 @@ class AdministersController extends Controller
     
         // セッションから一時保存データを削除
         $request->session()->forget('temp_category_data');
-        
+
         return view('admin.category_form', array_merge($data, ['registrationData' => $registrationData]));
     }    
     
@@ -581,6 +582,28 @@ class AdministersController extends Controller
         } catch (\Exception $e) {
             \Log::error($e->getMessage());
             return redirect()->route('admin.categoryForm')->with('error', 'カテゴリの更新中にエラーが発生しました。');
+        }
+    }
+
+    public function categoryDetail($id)
+    {
+        $category = ProductCategory::with('subcategories')->findOrFail($id);
+        return view('admin.category_detail', compact('category'));
+    }
+
+    public function deleteCategory(Request $request, $id)
+    {
+        try {
+            DB::transaction(function () use ($id) {
+                $category = ProductCategory::findOrFail($id);
+                $category->subcategories()->delete();  // 関連する小カテゴリを削除
+                $category->delete();  // 大カテゴリを削除
+            });
+    
+            return redirect()->route('admin.showCategoryList')->with('success', 'カテゴリを削除しました。');
+        } catch (\Exception $e) {
+            \Log::error($e->getMessage());
+            return redirect()->route('admin.showCategoryList')->with('error', 'カテゴリの削除中にエラーが発生しました。');
         }
     }
 
