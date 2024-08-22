@@ -60,7 +60,10 @@
         <p><input type="submit" id="submitButton" value="{{ $isEdit ? '編集完了' : '登録完了' }}"></p>
     </form>
 
-    <form action="{{ route('admin.categoryForm', $isEdit ? ['id' => $category->id] : []) }}" method="get">
+    <form action="{{ $isEdit ? route('admin.categoryForm', ['id' => $category->id]) : route('admin.categoryForm') }}" method="get">
+        @if(isset($category->id))
+            <input type="hidden" name="id" value="{{ $category->id }}">
+        @endif
         <input type="hidden" name="product_category" value="{{ $category->name }}">
         @foreach($category->subcategories as $subcategory)
             <input type="hidden" name="product_subcategory[]" value="{{ $subcategory }}">
