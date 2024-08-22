@@ -58,6 +58,9 @@
     </header>
 
     <main>
+    <form action="{{ route('admin.productForm') }}">
+       <button type="submit">商品登録</button>
+    </form>
 
     <!-- 商品検索 -->
     <form action="{{ route('admin.productList') }}" method="GET">

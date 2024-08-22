@@ -432,16 +432,20 @@ class AdministersController extends Controller
         });
 
         // カテゴリ情報を作成
-        $category = [
-            'name' => $validatedData['product_category'],
-            'subcategories' => $subcategories,
+        $category = (object)[
+        'name' => $validatedData['product_category'],
+        'subcategories' => $subcategories,
         ];
 
-        $request->session()->put('registrationData', $category); //追加
+        $request->session()->put('registrationData', (array)$category);
 
-        return view('admin.regist_category_confirm', [
+        $formToken = Str::random(40);
+        $request->session()->put('form_token', $formToken);
+        
+        return view('admin.category_confirm', [
             'category' => $category,
-            'category' => (object)$category,
+            'isEdit' => false,
+            'formToken' => $formToken,
         ]);
     }
 
@@ -484,68 +488,34 @@ class AdministersController extends Controller
         });
 
         // カテゴリ情報を更新
-        $updatedCategory = [
+        $category = (object)[
             'id' => $id,
             'name' => $validatedData['product_category'],
             'subcategories' => $subcategories,
         ];
-
+ 
         // セッションにデータを保存
-        $request->session()->put('updateCategoryData', $updatedCategory);
+        $request->session()->put('updateCategoryData', (array)$category);
+
+        $formToken = Str::random(40);
+        $request->session()->put('form_token', $formToken);
 
         // 確認画面にデータを渡す
-        return view('admin.update_category_confirm', [
+        return view('admin.category_confirm', [
             'category' => $category,  // モデルインスタンスをそのまま渡す
-            'updatedCategory' => (object)$updatedCategory,  // 更新されたデータ
+            'isEdit' => true,
+            'formToken' => $formToken,
         ]);
     }
 
-    public function registCategoryComp(Request $request)
+    //compのテンプレ
+    public function saveCategory(Request $request)
     {
-        // カテゴリ情報をリクエストから取得
-        $categoryName = $request->input('category_name');
-        $subcategories = $request->input('subcategories', []);
+        $isEdit = $request->has('id');
+        $sessionKey = $isEdit ? 'updateCategoryData' : 'registrationData';
+        $categoryData = $request->session()->get($sessionKey);
 
-        if (!$categoryName || empty($subcategories)) {
-            return redirect()->route('admin.categoryForm'); // カテゴリ情報不足
-        }
-
-        // 二重送信防止のトークンチェック
-        if ($request->session()->get('form_token') !== $request->input('form_token')) {
-            return redirect()->route('admin.showCategoryList')->with('error', '不正な操作が行われました。');
-        }
-        // トークンが正しければ、トークンを無効化（セッションから削除）
-        $request->session()->forget('form_token');
-
-        try {
-            \DB::transaction(function () use ($categoryName, $subcategories) {
-                // 新しい ProductCategory インスタンスを作成し、カテゴリ名を設定
-                $category = new ProductCategory();
-                $category->name = $categoryName;
-                $category->save();
-
-                // 小カテゴリを保存
-                foreach ($subcategories as $subcategoryName) {
-                    $category->subcategories()->create([
-                        'name' => $subcategoryName,
-                        'product_category_id' => $category->id,
-                    ]);
-                }
-            });
-
-            return redirect()->route('admin.showCategoryList'); // 登録成功
-
-        } catch (\Exception $e) {
-            \Log::error($e->getMessage());
-            return redirect()->route('admin.categoryForm'); // 登録中にエラー
-        }
-    }
-
-    public function updateCategoryComp(Request $request)
-    {
-        $updateData = $request->session()->get('updateCategoryData');
-
-        if (!$updateData) {
+        if (!$categoryData) {
             return redirect()->route('admin.showCategoryList')->with('error', 'カテゴリ情報が見つかりません。');
         }
 
@@ -553,38 +523,43 @@ class AdministersController extends Controller
         if ($request->session()->get('form_token') !== $request->input('form_token')) {
             return redirect()->route('admin.showCategoryList')->with('error', '不正な操作が行われました。');
         }
-        // トークンが正しければ、トークンを無効化（セッションから削除）
+        // トークンを無効化
         $request->session()->forget('form_token');
 
         try {
-            \DB::transaction(function () use ($updateData) {
-                $category = ProductCategory::findOrFail($updateData['id']);
-                
-                // 大カテゴリ名が変更された場合のみ更新
-                if ($category->name !== $updateData['name']) {
-                    $category->name = $updateData['name'];
+            DB::transaction(function () use ($categoryData, $isEdit) {
+                if ($isEdit) {
+                    $category = ProductCategory::findOrFail($categoryData['id']);
+                    $category->name = $categoryData['name'];
+                    $category->save();
+
+                    // 既存の小カテゴリをすべて削除
+                    $category->subcategories()->delete();
+                } else {
+                    $category = new ProductCategory();
+                    $category->name = $categoryData['name'];
                     $category->save();
                 }
 
-                // 既存の小カテゴリをすべて削除
-                $category->subcategories()->delete();
-
-                // 新しい小カテゴリを登録
-                foreach ($updateData['subcategories'] as $subcategoryName) {
+                // 小カテゴリを保存
+                foreach ($categoryData['subcategories'] as $subcategoryName) {
                     $category->subcategories()->create([
                         'name' => $subcategoryName,
                     ]);
                 }
             });
 
-            $request->session()->forget('updateCategoryData');
-            return redirect()->route('admin.showCategoryList')->with('success', 'カテゴリを更新しました。');
+            $request->session()->forget($sessionKey);
+            $message = $isEdit ? 'カテゴリを更新しました。' : 'カテゴリを登録しました。';
+            return redirect()->route('admin.showCategoryList')->with('success', $message);
 
         } catch (\Exception $e) {
             \Log::error($e->getMessage());
-            return redirect()->route('admin.categoryForm')->with('error', 'カテゴリの更新中にエラーが発生しました。');
+            $errorMessage = $isEdit ? 'カテゴリの更新中にエラーが発生しました。' : 'カテゴリの登録中にエラーが発生しました。';
+            return redirect()->route('admin.categoryForm')->with('error', $errorMessage);
         }
     }
+
 
     public function categoryDetail($id)
     {
@@ -607,6 +582,7 @@ class AdministersController extends Controller
             return redirect()->route('admin.showCategoryList')->with('error', 'カテゴリの削除中にエラーが発生しました。');
         }
     }
+
 
     public function productList(Request $request)
     {
@@ -636,6 +612,63 @@ class AdministersController extends Controller
         $products = $query->orderBy($sort, $direction)->paginate(10);
 
         return view('admin.product_list', compact('products', 'searchId', 'searchKeyword', 'sort', 'direction'));
+    }
+
+    //登録フォームを表示するメソッド。データがあればそれを表示したり。
+    public function productForm(Request $request)
+    {
+        //idがあれば編集、なければ新規商品登録に切り替える。
+        $id = $request->query('id'); //URLのクエリパラメータからidの値を取得。これは商品idと同じ。idパラメータがなければnullに。
+        $product = $id ? Product::findOrFail($id) : null; //idに対応するproductsテーブルのメソッドを取得。
+        $isEdit = $id !== null; //$idがnullでない（つまり、idが指定されている）場合、$isEditはtrue、nullの場合はfalse
+
+        // すべての小カテゴリを取得
+        $subCategories = ProductSubcategory::pluck('name', 'id')->toArray();
+        // 会員データを取得
+        $members = Member::select('id', 'name_sei', 'name_mei')->get();
+
+        $data = [
+            'title' => $isEdit ? '商品編集' : '商品登録',
+            'formAction' => $isEdit ? route('admin.updateProductConfirm', ['id' => $id]) : route('admin.registProductConfirm'),
+            'isEdit' => $isEdit,
+            'product' => $product,
+            'members' => $members,
+            'subCategories' => $subCategories,  // 追加
+            'validatedData' => session('validatedData', []),  // セッションからvalidatedDataを取得
+        ];
+
+        // 編集時の画像データを取得
+        if ($isEdit && $product) {
+            $imageData = [
+                'image_1' => $product->image_1,
+                'image_2' => $product->image_2,
+                'image_3' => $product->image_3,
+                'image_4' => $product->image_4,
+            ];
+            $data['imageData'] = $imageData;
+        }
+
+        return view('admin.product_form', $data);
+   }
+
+    public function registProductConfirm()
+    {
+        return view('admin.product_form');
+    }
+    
+    public function registProductComp()
+    {
+        return view('admin.product_form');
+    }
+    
+    public function updateProductConfirm()
+    {
+        return view('admin.product_form');
+    }
+    
+    public function updateProductComp()
+    {
+        return view('admin.product_form');
     }
 
 }

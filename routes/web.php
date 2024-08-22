@@ -124,13 +124,24 @@ Route::get('/admin/category/list', 'AdministersController@showCategoryList')->na
 
 Route::get('/admin/category/form', 'AdministersController@categoryForm')->name('admin.categoryForm');
 
-Route::post('/admin/category/regist/confirm', 'AdministersController@registCategoryConfirm')->name('admin.registCategoryConfirm');
-Route::post('/admin/category/regist/complete', 'AdministersController@registCategoryComp')->name('admin.registCategoryComp');
-
-Route::post('/admin/category/update/confirm', 'AdministersController@updateCategoryConfirm')->name('admin.updateCategoryConfirm');
-Route::post('/admin/category/update/complete/{id}', 'AdministersController@updateCategoryComp')->name('admin.updateCategoryComp');
-
 Route::get('/admin/category/detail/{id}', 'AdministersController@categoryDetail')->name('admin.categoryDetail');
 Route::post('/admin/category/delete/{id}', 'AdministersController@deleteCategory')->name('admin.deleteCategory');
 
+//修正版
+Route::post('/admin/category/regist/confirm', 'AdministersController@registCategoryConfirm')->name('admin.registCategoryConfirm');
+Route::post('/admin/category/update/confirm', 'AdministersController@updateCategoryConfirm')->name('admin.updateCategoryConfirm');
+Route::post('/admin/category/save', 'AdministersController@saveCategory')->name('admin.saveCategory');
+
 Route::get('/admin/product/list', 'AdministersController@productList')->name('admin.productList');
+
+//商品登録・編集フォームテンプレ
+Route::get('/admin/product/showForm', 'AdministersController@productForm')->name('admin.productForm');
+
+//新規登録
+Route::post('/admin/product/regist/confirm', 'AdministersController@registProductConfirm')->name('admin.registProductConfirm');
+Route::post('/admin/product/regist/complete', 'AdministersController@registProductComp')->name('admin.registProductComp');
+
+//編集
+Route::post('/admin/product/update/confirm', 'AdministersController@updateProductConfirm')->name('admin.updateProductConfirm');
+Route::post('/admin/product/update/complete', 'AdministersController@updateProductComp')->name('admin.updateProductComp');
+

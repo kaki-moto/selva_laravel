@@ -3,33 +3,37 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>カテゴリ登録確認</title>
+    <title>{{ $isEdit ? 'カテゴリ編集確認' : 'カテゴリ登録確認' }}</title>
 </head>
 <body>
     <header>
-        <h3>カテゴリ登録確認</h3>
+        <h3>{{ $isEdit ? 'カテゴリ編集確認' : 'カテゴリ登録確認' }}</h3>
         <form action="{{ route('admin.showCategoryList') }}" method="GET">
             <button type="submit">一覧に戻る</button>
         </form>
     </header>
     
-    <form action="{{ route('admin.registCategoryComp') }}" id="categoryRegist" method="post">
-        @csrf     
-        
+    <form action="{{ route('admin.saveCategory') }}" id="categoryRegist" method="post">
+        @csrf
+        <input type="hidden" name="form_token" value="{{ $formToken }}">
+        @if($isEdit)
+            <input type="hidden" name="id" value="{{ $category->id }}">
+        @endif
+
         <label>
             商品大カテゴリID
-            登録後に自動採番
+            @if($isEdit)
+                {{ $category->id }}
+            @else
+                登録後に自動採番
+            @endif
         </label>
         <br>
 
         <label>
             商品大カテゴリ
             <br>
-            @if(isset($category) && is_object($category))
-                {{ $category->name }}
-            @else
-                <p>大カテゴリ名を取得できませんでした。</p>
-            @endif
+            {{ $category->name }}
         </label>
         @error('product_category')
         <p style="color: red;">{{ $message }}</p>
@@ -53,10 +57,10 @@
             <input type="hidden" name="subcategories[]" value="{{ $subcategory }}">
         @endforeach
 
-        <p><input type="submit" id="submitButton" value="登録完了"></p>
+        <p><input type="submit" id="submitButton" value="{{ $isEdit ? '編集完了' : '登録完了' }}"></p>
     </form>
 
-    <form action="{{ route('admin.categoryForm') }}" method="get">
+    <form action="{{ route('admin.categoryForm', $isEdit ? ['id' => $category->id] : []) }}" method="get">
         <input type="hidden" name="product_category" value="{{ $category->name }}">
         @foreach($category->subcategories as $subcategory)
             <input type="hidden" name="product_subcategory[]" value="{{ $subcategory }}">
@@ -64,10 +68,9 @@
         <input type="submit" value="前に戻る">
     </form>
 
-
 <script>
 document.getElementById('categoryRegist').addEventListener('submit', function() {
-document.getElementById('submitButton').disabled = true;
+    document.getElementById('submitButton').disabled = true;
 });
 </script>
     
