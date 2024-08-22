@@ -21,13 +21,14 @@
     @csrf
 
     @if($isEdit)
-        <input type="hidden" name="id" value="{{ $product->id }}">
+        <!--<input type="hidden" name="id" value="{{ $product->id }}">-->
+        <input type="hidden" name="id" value="{{ old('id', $inputData['id'] ?? $product->id ?? '') }}">
     @endif
 
     @if($isEdit)
         <label>
             ID
-            {{ $product->id }}
+            {{ old('id', $inputData['id'] ?? $product->id ?? '') }}
         </label>
     @else
         <label>
@@ -42,7 +43,7 @@
         <select name="member_id" id="member-name">
         <option value="">選択してください</option>
         @foreach($members as $member)
-        <option value="{{ $member->id }}" {{ (old('member_id', $product->member_id ?? '') == $member->id) ? 'selected' : '' }}>
+        <option value="{{ $member->id }}" {{ (old('member_id', $inputData['member_id'] ?? $product->member_id ?? '') == $member->id) ? 'selected' : '' }}>
             {{ $member->name_sei }} {{ $member->name_mei }}
         </option>
         @endforeach
@@ -55,7 +56,7 @@
 
     <label>
         商品名
-        <input type="text" name="name" value="{{ old('name', $product->name ?? '') }}">
+        <input type="text" name="name" value="{{ old('name', $inputData['name'] ?? $product->name ?? '') }}">
     </label>
     @error('name')
         <div style="color: red;">{{ $message }}</div>
@@ -68,7 +69,7 @@
         <select name="product_category_id" id="product-category-id">
             <option value="">選択してください</option>
             @foreach($mainCategories as $id => $name)
-            <option value="{{ $id }}" {{ (old('product_category_id', $product->product_category_id ?? '') == $id) ? 'selected' : '' }}>
+            <option value="{{ $id }}" {{ (old('product_category_id', $inputData['product_category_id'] ?? $product->product_category_id ?? '') == $id) ? 'selected' : '' }}>
                 {{ $name }}
             </option>
             @endforeach
@@ -78,10 +79,10 @@
         @enderror
 
         <!--小カテゴリ-->
-        <select name="product_subcategory_id" id="product-subcategory-id" style="{{ isset($product->product_category_id) ? '' : 'display: none;' }}">
+        <select name="product_subcategory_id" id="product-subcategory-id" style="{{ isset($inputData['product_category_id']) || isset($product->product_category_id) ? '' : 'display: none;' }}">
             <option value="">選択してください</option>
             @foreach($subCategories as $key => $value)
-            <option value="{{ $key }}" {{ (old('product_subcategory_id', $product->product_subcategory_id ?? '') == $key) ? 'selected' : '' }}>{{ $value }}</option>
+            <option value="{{ $key }}" {{ (old('product_subcategory_id', $inputData['product_subcategory_id'] ?? $product->product_subcategory_id ?? '') == $key) ? 'selected' : '' }}>{{ $value }}</option>
             @endforeach
         </select>
     </label>
@@ -97,9 +98,9 @@
         写真{{ $i }}
         <input type="file" name="image_{{ $i }}" id="image_{{ $i }}" accept=".jpg,.jpeg,.png,.gif" class="product-image" style="display: none;">
         <div id="image-preview-{{ $i }}" class="image-preview-container">
-            @if(isset($inputData["image_{$i}"]))
-                <img src="{{ asset('storage/' . $inputData["image_{$i}"]) }}" alt="商品画像{{ $i }}" style="width: 200px;">
-                <input type="hidden" name="existing_image_{{ $i }}" value="{{ $inputData["image_{$i}"] }}">
+            @if(isset($inputData["image_{$i}"]) || isset($product->{"image_{$i}"}))
+                <img src="{{ asset('storage/' . ($inputData["image_{$i}"] ?? $product->{"image_{$i}"})) }}" alt="商品画像{{ $i }}" style="width: 200px;">
+                <input type="hidden" name="existing_image_{{ $i }}" value="{{ $inputData["image_{$i}"] ?? $product->{"image_{$i}"} ?? '' }}">
             @endif
         </div>
         <button type="button" class="upload-button" data-target="{{ $i }}">アップロード</button>
@@ -113,7 +114,7 @@
 
     <label>
         商品説明
-        <textarea id="product-content" name="product_content">{{ old('product_content', $product->product_content ?? '') }}</textarea>
+        <textarea id="product-content" name="product_content">{{ old('product_content', $inputData['product_content'] ?? $product->product_content ?? '') }}</textarea>
         <div id="description-error" style="color: red;"></div>
         @error('product_content')
             <div style="color: red;">{{ $message }}</div>

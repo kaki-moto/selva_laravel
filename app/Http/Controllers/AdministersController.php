@@ -623,24 +623,35 @@ class AdministersController extends Controller
         $product = $id ? Product::findOrFail($id) : null; //idに対応するproductsテーブルのメソッドを取得。
         $isEdit = $id !== null; //$idがnullでない（つまり、idが指定されている）場合、$isEditはtrue、nullの場合はfalse
 
-        // すべての大カテゴリを取得
-        $mainCategories = ProductCategory::pluck('name', 'id')->toArray();
+        $fromConfirm = $request->query('from_confirm') == '1';
 
         // セッションからproduct_dataとimageDataを取得
         $productData = $request->session()->get('product_data', []);
         $imageData = $request->session()->get('imageData', []);
 
-        // リクエストの入力データとセッションデータをマージ
-        $inputData = array_merge($productData, $request->old(), $imageData);
+        // データの優先順位を設定
+        if ($fromConfirm) {
+            $inputData = array_merge(
+                $product ? $product->toArray() : [],
+                $productData,
+                $request->all(),
+                $imageData
+            );
+        } else {
+            $inputData = array_merge(
+                $product ? $product->toArray() : [],
+                $request->old() ?: $productData,
+                $imageData
+            );
+        }
 
-        // 小カテゴリを取得（初期表示用）
+        // すべての大カテゴリを取得
+        $mainCategories = ProductCategory::pluck('name', 'id')->toArray();
+
+        // 小カテゴリを取得
         $subCategories = [];
         if (!empty($inputData['product_category_id'])) {
             $subCategories = ProductSubcategory::where('product_category_id', $inputData['product_category_id'])
-                ->pluck('name', 'id')
-                ->toArray();
-        } elseif ($isEdit && $product->product_category_id) {
-            $subCategories = ProductSubcategory::where('product_category_id', $product->product_category_id)
                 ->pluck('name', 'id')
                 ->toArray();
         }
@@ -659,17 +670,18 @@ class AdministersController extends Controller
             'inputData' => $inputData,
         ];
 
-        // 画像データの処理
-        for ($i = 1; $i <= 4; $i++) {
+       // 画像データの処理
+       for ($i = 1; $i <= 4; $i++) {
             $imageKey = "image_{$i}";
-            if (isset($imageData[$imageKey])) {
-                $inputData[$imageKey] = $imageData[$imageKey];
+            $existingImageKey = "existing_image_{$i}";
+            if (isset($inputData[$existingImageKey])) {
+                $data['inputData'][$imageKey] = $inputData[$existingImageKey];
+            } elseif (isset($imageData[$imageKey])) {
+                $data['inputData'][$imageKey] = $imageData[$imageKey];
             } elseif ($isEdit && $product && $product->$imageKey) {
-                $inputData[$imageKey] = $product->$imageKey;
+                $data['inputData'][$imageKey] = $product->$imageKey;
             }
         }
-
-        $data['inputData'] = $inputData;
 
         // セッションデータをクリア
         $request->session()->forget(['product_data', 'imageData']);
@@ -745,6 +757,7 @@ class AdministersController extends Controller
         if ($isEdit) {
             $product = Product::findOrFail($request->input('id'));
             $product->fill($productData);
+            $productData['id'] = $request->input('id');  // この行を追加
         } else {
             $product = new Product($productData);
         }
@@ -757,7 +770,9 @@ class AdministersController extends Controller
 
         $formToken = Str::random(40);
         $request->session()->put('form_token', $formToken);
-        $request->session()->put('product_data', $product->toArray());
+        $request->session()->put('product_data', $productData);
+        \Log::info('Product data saved to session', ['productData' => $productData]);
+        $request->session()->put('imageData', $imageData);
 
         return view('admin.product_confirm', [
             'product' => $product,
@@ -773,24 +788,36 @@ class AdministersController extends Controller
         $isEdit = $request->has('id');
         $productData = $request->session()->get('product_data');
 
+        \Log::info('saveProduct called', [
+            'isEdit' => $isEdit,
+            'productData' => $productData,
+            'request' => $request->all()
+        ]);
+
         if (!$productData) {
-            return redirect()->route('admin.productList')->with('error', '商品情報が見つかりません。');
+            \Log::warning('Product data not found in session');
+            return redirect()->route('admin.productForm', ['id' => $request->input('id')])->with('error', '商品情報が見つかりません。フォームを再度送信してください。');
         }
 
         // 二重送信防止のトークンチェック
         if ($request->session()->get('form_token') !== $request->input('form_token')) {
-            return redirect()->route('admin.productList')->with('error', '不正な操作が行われました。');
+            \Log::warning('Form token mismatch');
+            return redirect()->route('admin.productForm', ['id' => $request->input('id')])->with('error', '不正な操作が行われました。');
         }
         $request->session()->forget('form_token');
 
         try {
             DB::transaction(function () use ($productData, $isEdit) {
+                \Log::info('Starting DB transaction');
+
                 if ($isEdit) {
                     $product = Product::findOrFail($productData['id']);
+                    \Log::info('Updating existing product', ['id' => $product->id]);
                 } else {
                     $product = new Product();
+                    \Log::info('Creating new product');
                 }
-    
+        
                 // 画像の処理
                 for ($i = 1; $i <= 4; $i++) {
                     $imageKey = "image_{$i}";
@@ -799,21 +826,28 @@ class AdministersController extends Controller
                         $newPath = str_replace('temp_product_images/', 'product_images/', $productData[$imageKey]);
                         Storage::disk('public')->move($productData[$imageKey], $newPath);
                         $productData[$imageKey] = $newPath;
+                        \Log::info("Processed image {$i}", ['newPath' => $newPath]);
                     }
                 }
-    
+        
                 $product->fill($productData);
                 $product->save();
+                \Log::info('Product saved successfully', ['id' => $product->id]);
             });
-    
+        
             $request->session()->forget('product_data');
             $message = $isEdit ? '商品を更新しました。' : '商品を登録しました。';
+            \Log::info('Product save completed', ['isEdit' => $isEdit]);
             return redirect()->route('admin.productList')->with('success', $message);
-    
+        
         } catch (\Exception $e) {
-            \Log::error($e->getMessage());
+            \Log::error('Product save failed: ' . $e->getMessage(), [
+                'exception' => $e,
+                'isEdit' => $isEdit,
+                'productData' => $productData
+            ]);
             $errorMessage = $isEdit ? '商品の更新中にエラーが発生しました。' : '商品の登録中にエラーが発生しました。';
-            return redirect()->route('admin.productForm')->with('error', $errorMessage);
+            return redirect()->route('admin.productForm', ['id' => $request->input('id')])->with('error', $errorMessage);
         }
     }
 
@@ -828,28 +862,6 @@ class AdministersController extends Controller
             \Log::info('Retrieved sub categories: ' . json_encode($subCategories));
 
         return response()->json($subCategories);
-    }
-
-
-
-    public function registProductConfirm()
-    {
-        return view('admin.product_form');
-    }
-    
-    public function registProductComp()
-    {
-        return view('admin.product_form');
-    }
-    
-    public function updateProductConfirm()
-    {
-        return view('admin.product_form');
-    }
-    
-    public function updateProductComp()
-    {
-        return view('admin.product_form');
     }
 
 }

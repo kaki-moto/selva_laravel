@@ -69,13 +69,19 @@
         <button type="submit">{{ $isEdit ? '更新完了' : '登録完了' }}</button>
     </form>
 
-
-    <form action="{{ $isEdit ? route('admin.productForm', ['id' => $product->id]) : route('admin.productForm') }}" method="get">
-        @csrf
-        @if(isset($category->id))
-            <input type="hidden" name="id" value="{{ $product->id }}">
+    <form action="{{ route('admin.productForm', $isEdit ? ['id' => $product->id] : []) }}" method="get">
+    @foreach($product->toArray() as $key => $value)
+        @if(!is_array($value) && !is_object($value))
+            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
         @endif
-        <input type="submit" value="前に戻る">
+    @endforeach
+    @for($i = 1; $i <= 4; $i++)
+        @if(isset($product->{"image_{$i}"}))
+            <input type="hidden" name="existing_image_{{ $i }}" value="{{ $product->{"image_{$i}"} }}">
+        @endif
+    @endfor
+    <input type="hidden" name="from_confirm" value="1">
+    <input type="submit" value="前に戻る">
     </form>
 
 </body>

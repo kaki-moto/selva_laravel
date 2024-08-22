@@ -47,5 +47,17 @@ return [
             'regex' => 'パスワードは半角英数字のみ使用できます。',
             'confirmed' => 'パスワードとパスワード確認が一致しません。',
         ],
+        'image_1' => [
+            'required_without' => ':attributeを選択してください。',
+        ],
+        'image_2' => [
+            'required_without' => ':attributeを選択してください。',
+        ],
+        'image_3' => [
+            'required_without' => ':attributeを選択してください。',
+        ],
+        'image_4' => [
+            'required_without' => ':attributeを選択してください。',
+        ],
     ],
 ];
