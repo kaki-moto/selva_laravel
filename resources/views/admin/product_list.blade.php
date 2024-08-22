@@ -111,7 +111,7 @@
                 </td>
                 <td>{{ $product->created_at }}</td>
                 <td>
-                    編集
+                    <a href="{{ route('admin.productForm', ['id' => $product->id]) }}">編集</a>
                 </td>
             </tr>
             @endforeach

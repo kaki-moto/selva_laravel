@@ -31,6 +31,15 @@ return [
         'product_category' => '商品大カテゴリ',
         'product_subcategories' => '商品小カテゴリ',
         'product_subcategory.0' => '商品小カテゴリ',
+        'member_id' => '会員',
+        'name' => '商品名',
+        'product_category_id' => '大カテゴリ',
+        'product_subcategory_id' => '小カテゴリ',
+        'product_content' => '商品説明',
+        'image_1' => '写真1',
+        'image_2' => '写真2',
+        'image_3' => '写真3',
+        'image_4' => '写真4',
     ],
 
     'custom' => [

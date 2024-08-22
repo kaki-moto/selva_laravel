@@ -14,6 +14,7 @@ use App\Product;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 
 class AdministersController extends Controller
@@ -615,41 +616,221 @@ class AdministersController extends Controller
     }
 
     //登録フォームを表示するメソッド。データがあればそれを表示したり。
-    public function productForm(Request $request)
+    public function productForm(Request $request, $id = null)
     {
         //idがあれば編集、なければ新規商品登録に切り替える。
-        $id = $request->query('id'); //URLのクエリパラメータからidの値を取得。これは商品idと同じ。idパラメータがなければnullに。
+        $id = $id ?? $request->query('id');
         $product = $id ? Product::findOrFail($id) : null; //idに対応するproductsテーブルのメソッドを取得。
         $isEdit = $id !== null; //$idがnullでない（つまり、idが指定されている）場合、$isEditはtrue、nullの場合はfalse
 
-        // すべての小カテゴリを取得
-        $subCategories = ProductSubcategory::pluck('name', 'id')->toArray();
+        // すべての大カテゴリを取得
+        $mainCategories = ProductCategory::pluck('name', 'id')->toArray();
+
+        // セッションからproduct_dataとimageDataを取得
+        $productData = $request->session()->get('product_data', []);
+        $imageData = $request->session()->get('imageData', []);
+
+        // リクエストの入力データとセッションデータをマージ
+        $inputData = array_merge($productData, $request->old(), $imageData);
+
+        // 小カテゴリを取得（初期表示用）
+        $subCategories = [];
+        if (!empty($inputData['product_category_id'])) {
+            $subCategories = ProductSubcategory::where('product_category_id', $inputData['product_category_id'])
+                ->pluck('name', 'id')
+                ->toArray();
+        } elseif ($isEdit && $product->product_category_id) {
+            $subCategories = ProductSubcategory::where('product_category_id', $product->product_category_id)
+                ->pluck('name', 'id')
+                ->toArray();
+        }
+
         // 会員データを取得
         $members = Member::select('id', 'name_sei', 'name_mei')->get();
 
         $data = [
             'title' => $isEdit ? '商品編集' : '商品登録',
-            'formAction' => $isEdit ? route('admin.updateProductConfirm', ['id' => $id]) : route('admin.registProductConfirm'),
+            'formAction' => $isEdit ? route('admin.productConfirm', ['id' => $id]) : route('admin.productConfirm'),
             'isEdit' => $isEdit,
-            'product' => $product,
+            'product' => $product ?? new Product($inputData),
             'members' => $members,
-            'subCategories' => $subCategories,  // 追加
-            'validatedData' => session('validatedData', []),  // セッションからvalidatedDataを取得
+            'mainCategories' => $mainCategories,
+            'subCategories' => $subCategories,
+            'inputData' => $inputData,
         ];
 
-        // 編集時の画像データを取得
-        if ($isEdit && $product) {
-            $imageData = [
-                'image_1' => $product->image_1,
-                'image_2' => $product->image_2,
-                'image_3' => $product->image_3,
-                'image_4' => $product->image_4,
-            ];
-            $data['imageData'] = $imageData;
+        // 画像データの処理
+        for ($i = 1; $i <= 4; $i++) {
+            $imageKey = "image_{$i}";
+            if (isset($imageData[$imageKey])) {
+                $inputData[$imageKey] = $imageData[$imageKey];
+            } elseif ($isEdit && $product && $product->$imageKey) {
+                $inputData[$imageKey] = $product->$imageKey;
+            }
         }
+
+        $data['inputData'] = $inputData;
+
+        // セッションデータをクリア
+        $request->session()->forget(['product_data', 'imageData']);
 
         return view('admin.product_form', $data);
    }
+
+    //商品：確認画面テンプレ
+    public function productConfirm(Request $request)
+    {
+        $isEdit = $request->has('id'); //リクエストにidパラメータが含まれているかを確認し、含まれていれば編集モード（$isEdit = true）、含まれていなければ新規登録モード（$isEdit = false）と判断
+
+        // バリデーションルール
+        $rules = [
+            'member_id' => 'required|exists:members,id',
+            'name' => 'required|max:100',
+            'product_category_id' => 'required|exists:product_categories,id',
+            'product_subcategory_id' => 'required|exists:product_subcategories,id',
+            'product_content' => 'required|max:500',
+        ];
+
+        // 画像のバリデーションルールを動的に設定
+        for ($i = 1; $i <= 4; $i++) {
+            $imageKey = "image_{$i}";
+            $existingImageKey = "existing_image_{$i}";
+            
+            if ($isEdit) {
+                $rules[$imageKey] = 'nullable|image|max:10240|mimes:jpeg,png,jpg,gif';
+            } else {
+                $rules[$imageKey] = $i === 1 ? 'required_without:'.$existingImageKey.'|image|max:10240|mimes:jpeg,png,jpg,gif' : 'nullable|image|max:10240|mimes:jpeg,png,jpg,gif';
+            }
+        }
+
+        $validator = Validator::make($request->all(), $rules); //バリデーションを実行。もし失敗した場合は、商品登録または編集フォームにリダイレクト。エラーメッセージと入力内容をリクエストに戻す。
+
+        if ($validator->fails()) {
+            // エラー時に画像データを保持
+            $imageData = [];
+            for ($i = 1; $i <= 4; $i++) {
+                $imageKey = "image_{$i}";
+                $existingImageKey = "existing_image_{$i}";
+                if ($request->hasFile($imageKey)) {
+                    $path = $request->file($imageKey)->store('temp_product_images', 'public');
+                    $imageData[$imageKey] = $path;
+                } elseif ($request->has($existingImageKey)) {
+                    $imageData[$imageKey] = $request->input($existingImageKey);
+                }
+            }
+        
+            return redirect()->route('admin.productForm', $isEdit ? ['id' => $request->input('id')] : [])
+            ->withErrors($validator)
+            ->withInput()
+            ->with('imageData', $imageData);
+        }
+
+        $validatedData = $validator->validated();
+        
+        // 画像の処理
+        $imageData = [];
+        for ($i = 1; $i <= 4; $i++) {
+            $imageKey = "image_{$i}";
+            $existingImageKey = "existing_image_{$i}";
+            if ($request->hasFile($imageKey)) {
+                $path = $request->file($imageKey)->store('temp_product_images', 'public');
+                $imageData[$imageKey] = $path;
+            } elseif ($request->has($existingImageKey)) {
+                $imageData[$imageKey] = $request->input($existingImageKey);
+            }
+        }
+
+        $productData = array_merge($validatedData, $imageData); // バリデーション済みのデータと画像データをマージして、$productDataに保存
+
+        if ($isEdit) {
+            $product = Product::findOrFail($request->input('id'));
+            $product->fill($productData);
+        } else {
+            $product = new Product($productData);
+        }
+
+        // 会員情報を取得
+        $product->member = Member::findOrFail($productData['member_id']);
+
+        // カテゴリ情報を設定
+        $product->load('category', 'subcategory');
+
+        $formToken = Str::random(40);
+        $request->session()->put('form_token', $formToken);
+        $request->session()->put('product_data', $product->toArray());
+
+        return view('admin.product_confirm', [
+            'product' => $product,
+            'isEdit' => $isEdit,
+            'formToken' => $formToken,
+        ]);
+    }
+
+
+    //商品：DBに保存のテンプレ
+    public function saveProduct(Request $request)
+    {
+        $isEdit = $request->has('id');
+        $productData = $request->session()->get('product_data');
+
+        if (!$productData) {
+            return redirect()->route('admin.productList')->with('error', '商品情報が見つかりません。');
+        }
+
+        // 二重送信防止のトークンチェック
+        if ($request->session()->get('form_token') !== $request->input('form_token')) {
+            return redirect()->route('admin.productList')->with('error', '不正な操作が行われました。');
+        }
+        $request->session()->forget('form_token');
+
+        try {
+            DB::transaction(function () use ($productData, $isEdit) {
+                if ($isEdit) {
+                    $product = Product::findOrFail($productData['id']);
+                } else {
+                    $product = new Product();
+                }
+    
+                // 画像の処理
+                for ($i = 1; $i <= 4; $i++) {
+                    $imageKey = "image_{$i}";
+                    if (isset($productData[$imageKey]) && Str::startsWith($productData[$imageKey], 'temp_product_images/')) {
+                        // 一時ファイルを正式な場所に移動
+                        $newPath = str_replace('temp_product_images/', 'product_images/', $productData[$imageKey]);
+                        Storage::disk('public')->move($productData[$imageKey], $newPath);
+                        $productData[$imageKey] = $newPath;
+                    }
+                }
+    
+                $product->fill($productData);
+                $product->save();
+            });
+    
+            $request->session()->forget('product_data');
+            $message = $isEdit ? '商品を更新しました。' : '商品を登録しました。';
+            return redirect()->route('admin.productList')->with('success', $message);
+    
+        } catch (\Exception $e) {
+            \Log::error($e->getMessage());
+            $errorMessage = $isEdit ? '商品の更新中にエラーが発生しました。' : '商品の登録中にエラーが発生しました。';
+            return redirect()->route('admin.productForm')->with('error', $errorMessage);
+        }
+    }
+
+    public function getSubcategories(Request $request)
+    {
+        $mainCategoryId = $request->input('main_category_id');
+        $subCategories = ProductSubcategory::where('product_category_id', $mainCategoryId)
+            ->pluck('name', 'id')
+            ->toArray();
+
+            \Log::info('Requested main category ID: ' . $mainCategoryId);
+            \Log::info('Retrieved sub categories: ' . json_encode($subCategories));
+
+        return response()->json($subCategories);
+    }
+
+
 
     public function registProductConfirm()
     {

@@ -134,14 +134,11 @@ Route::post('/admin/category/save', 'AdministersController@saveCategory')->name(
 
 Route::get('/admin/product/list', 'AdministersController@productList')->name('admin.productList');
 
-//商品登録・編集フォームテンプレ
-Route::get('/admin/product/showForm', 'AdministersController@productForm')->name('admin.productForm');
+//商品登録・編集フォームテンプレ。{id?}はオプションのパラメータで新規登録時にはIDが不要であることを意味
+Route::get('/admin/product/form/{id?}', 'AdministersController@productForm')->name('admin.productForm');
 
-//新規登録
-Route::post('/admin/product/regist/confirm', 'AdministersController@registProductConfirm')->name('admin.registProductConfirm');
-Route::post('/admin/product/regist/complete', 'AdministersController@registProductComp')->name('admin.registProductComp');
+Route::post('/admin/product/confirm', 'AdministersController@productConfirm')->name('admin.productConfirm');
+Route::post('/admin/product/save', 'AdministersController@saveProduct')->name('admin.saveProduct');
 
-//編集
-Route::post('/admin/product/update/confirm', 'AdministersController@updateProductConfirm')->name('admin.updateProductConfirm');
-Route::post('/admin/product/update/complete', 'AdministersController@updateProductComp')->name('admin.updateProductComp');
-
+//小カテゴリ表示のため
+Route::get('/get-subcategories', 'AdministersController@getSubcategories')->name('get-subcategories');
