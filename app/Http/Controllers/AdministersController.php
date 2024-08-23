@@ -916,5 +916,44 @@ class AdministersController extends Controller
             return redirect()->route('admin.productList')->with('error', '商品の削除中にエラーが発生しました。');
         }
     }
+
+    public function reviewList(Request $request)
+    {
+        // ソートのパラメータを取得（デフォルトはidで降順）
+        $sort = $request->input('sort', 'id');
+        $direction = $request->input('direction', 'desc');
+
+        // 検索条件の取得
+        $searchId = $request->input('search_id'); //seach_idは検索のinputタグのname属性
+        $searchKeyword = $request->input('search_keyword');
+
+        // クエリビルダーを使用して検索条件に基づくフィルタリングを実行
+        $query = ReviewRegist::query();
+
+        if (!empty($searchId)) {
+            $query->where('id', $searchId);
+        }
+        
+        if (!empty($searchKeyword)) {
+            $query->where(function($q) use ($searchKeyword) {
+                $q->where('comment', 'like', '%' . $searchKeyword . '%');
+            });
+        }
+        
+        // 指定されたカラムで昇順・降順に並び替える
+        $reviews = $query->orderBy($sort, $direction)->paginate(10);
+        
+        return view('admin.review_list', compact('reviews', 'searchId', 'searchKeyword', 'sort', 'direction'));
+    }
+
+    public function reviewForm(Request $request)
+    {
+        return view('admin.review_form');
+    }
+
+    public function reviewDetail(Request $request)
+    {
+        return view('admin.review_form');
+    }
     
 }

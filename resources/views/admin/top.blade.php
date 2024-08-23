@@ -25,6 +25,9 @@
         <form action="{{ route('admin.productList') }}" method="GET">
             <button type="submit">商品一覧</button>
         </form>
+        <form action="{{ route('admin.reviewList') }}" method="GET">
+            <button type="submit">商品レビュー一覧</button>
+        </form>
     </main>
 
 </body>

@@ -145,3 +145,8 @@ Route::get('/get-subcategories', 'AdministersController@getSubcategories')->name
 
 Route::get('/admin/product/detail/{id?}', 'AdministersController@productDetail')->name('admin.productDetail');
 Route::post('/admin/product/delete/{id?}', 'AdministersController@productDelete')->name('admin.productDelete');
+
+Route::get('/admin/review/list', 'AdministersController@reviewList')->name('admin.reviewList');
+
+Route::get('/admin/review/form/{id?}', 'AdministersController@reviewForm')->name('admin.reviewForm');
+Route::get('/admin/review/detail/{id?}', 'AdministersController@reviewDetail')->name('admin.reviewDetail');
