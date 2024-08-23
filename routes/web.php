@@ -149,4 +149,7 @@ Route::post('/admin/product/delete/{id?}', 'AdministersController@productDelete'
 Route::get('/admin/review/list', 'AdministersController@reviewList')->name('admin.reviewList');
 
 Route::get('/admin/review/form/{id?}', 'AdministersController@reviewForm')->name('admin.reviewForm');
+Route::post('/admin/review/confirm/{id?}', 'AdministersController@reviewConfirm')->name('admin.reviewConfirm');
+Route::post('/admin/review/complete/{id?}', 'AdministersController@reviewComp')->name('admin.reviewComp');
+
 Route::get('/admin/review/detail/{id?}', 'AdministersController@reviewDetail')->name('admin.reviewDetail');

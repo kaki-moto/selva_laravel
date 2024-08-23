@@ -946,14 +946,124 @@ class AdministersController extends Controller
         return view('admin.review_list', compact('reviews', 'searchId', 'searchKeyword', 'sort', 'direction'));
     }
 
-    public function reviewForm(Request $request)
+    public function reviewForm(Request $request, $id = null)
     {
-        return view('admin.review_form');
+        //idがあれば編集、なければ新規商品登録に切り替える。
+        $id = $id ?? $request->query('id');
+        $review = $id ? ReviewRegist::findOrFail($id) : new ReviewRegist();
+        $isEdit = $id !== null; //$idがnullでない（つまり、idが指定されている）場合、$isEditはtrue、nullの場合はfalse
+
+        // 確認画面から戻ってきた時、データ保持してたいので、セッションからデータを取得
+        $oldData = $request->session()->get('review_form_data', []);
+        // セッションデータがある場合は、それを使用
+        if (!empty($oldData)) {
+            $review->fill($oldData);
+        }
+
+        // 会員データを取得
+        $members = Member::select('id', 'name_sei', 'name_mei')
+        ->get()
+        ->mapWithKeys(function ($member) {
+            return [$member->id => $member->name_sei . ' ' . $member->name_mei];
+        });
+
+        // 商品データを取得
+        $products = Product::pluck('name', 'id');
+
+        $data = [
+            'title' => $isEdit ? '商品レビュー編集' : '商品レビュー登録',
+            'formAction' => $isEdit ? route('admin.reviewConfirm', ['id' => $id]) : route('admin.reviewConfirm'),
+            'isEdit' => $isEdit,
+            'review' => $review,
+            'members' => $members,
+            'products' => $products,
+        ];
+
+        // セッションデータをクリア
+        $request->session()->forget('review_form_data');
+
+        return view('admin.review_form', $data);
+    }
+
+    public function reviewConfirm(Request $request)
+    {
+        //$isEdit = $request->has('id'); //リクエストにidパラメータが含まれているかを確認し、含まれていれば編集モード（$isEdit = true）、含まれていなければ新規登録モード（$isEdit = false）と判断
+        $isEdit = $request->has('review_id'); // review_id が存在する場合は編集モード
+
+        // バリデーションルール
+        $rules = [
+            'product_id' => 'required|exists:products,id',
+            'member_id' => 'required|exists:members,id',
+            'evaluation' => 'required|integer|min:1|max:5|in:1,2,3,4,5',
+            'comment' => 'required|string|max:500',
+        ];
+
+        $messages = [
+            'product_id.required' => '商品を選択してください。',
+            'product_id.exists' => '選択された商品は存在しません。',
+            'member_id.required' => '会員を選択してください。',
+            'member_id.exists' => '選択された会員は存在しません。',
+            'evaluation.required' => '商品評価を選択してください。',
+
+        ];
+
+        $validatedData = $request->validate($rules, $messages);
+
+        // 確認画面からフォームに戻った時にデータを保持するためセッションにデータを保存
+        $request->session()->put('review_form_data', $validatedData);
+
+        if ($isEdit) {
+            $review = ReviewRegist::findOrFail($request->review_id);
+            $review->fill($validatedData);
+        } else {
+            $review = new ReviewRegist($validatedData);
+        }
+    
+        $review->load('product', 'member');
+
+        // 商品に関連する全てのレビューを取得（評価の平均値も取得する）
+        $averageRating = ReviewRegist::where('product_id', $validatedData['product_id'])
+            ->avg('evaluation');
+        // 評価の平均値を切り上げして整数にする
+        $averageRating = ceil($averageRating);
+
+        // レビューの総数を取得
+        $totalReviews = ReviewRegist::where('product_id', $validatedData['product_id'])->count();
+
+        return view('admin.review_confirm', [
+            'review' => $review,
+            'isEdit' => $isEdit,
+            'averageRating' => $averageRating,
+            'totalReviews' => $totalReviews,
+        ]);
+    }
+
+    public function reviewComp(Request $request)
+    {
+        $id = $request->input('id');
+        $isEdit = $id !== null;
+
+        $validatedData = $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'member_id' => 'required|exists:members,id',
+            'evaluation' => 'required|integer|min:1|max:5',
+            'comment' => 'required|string|max:500',
+        ]);
+
+        if ($isEdit) {
+            $review = ReviewRegist::findOrFail($id);
+            $review->update($validatedData);
+        } else {
+            $review = ReviewRegist::create($validatedData);
+        }
+
+        return redirect()->route('admin.reviewList')->with('success', 'レビューが正常に' . ($isEdit ? '更新' : '登録') . 'されました。');
     }
 
     public function reviewDetail(Request $request)
     {
-        return view('admin.review_form');
+        //$review = ReviewRegist::indOrFail($id);
+        return view('admin.review_detail');
     }
     
 }

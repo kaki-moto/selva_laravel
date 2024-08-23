@@ -45,4 +45,49 @@ class Product extends Model
         return $this->hasMany(ReviewRegist::class, 'product_id');
     }
 
+     /**
+     * 商品の最初の画像のURLを取得する
+     *
+     * @return string|null
+     */
+    public function getFirstImageUrl()
+    {
+        for ($i = 1; $i <= 4; $i++) {
+            $imageField = "image_{$i}";
+            if ($this->$imageField) {
+                return asset('storage/' . $this->$imageField);
+            }
+        }
+        return null; // 画像が見つからない場合
+    }
+
+    /**
+     * 商品の全ての画像のURLを取得する
+     *
+     * @return array
+     */
+    public function getAllImageUrls()
+    {
+        $urls = [];
+        for ($i = 1; $i <= 4; $i++) {
+            $imageField = "image_{$i}";
+            if ($this->$imageField) {
+                $urls[] = asset('storage/' . $this->$imageField);
+            }
+        }
+        return $urls;
+    }
+
+    /**
+     * 指定されたインデックスの画像URLを取得する
+     *
+     * @param int $index
+     * @return string|null
+     */
+    public function getImageUrl($index)
+    {
+        $imageField = "image_{$index}";
+        return $this->$imageField ? asset('storage/' . $this->$imageField) : null;
+    }
+
 }

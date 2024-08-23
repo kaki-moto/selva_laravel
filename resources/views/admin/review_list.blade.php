@@ -58,7 +58,7 @@
     </header>
 
     <main>
-    <form action="{{ route('admin.productForm') }}">
+    <form action="{{ route('admin.reviewForm') }}">
        <button type="submit">商品レビュー登録</button>
     </form>
 
