@@ -8,8 +8,8 @@
 <body>
     <header>
         <h3>商品レビュー詳細</h3>
-        <form action="{{ route('admin.top') }}" method="GET">
-            <button type="submit">トップに戻る</button>
+        <form action="{{ route('admin.reviewList') }}" method="GET">
+            <button type="submit">一覧に戻る</button>
         </form>
     </header>
 
