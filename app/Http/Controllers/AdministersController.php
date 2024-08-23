@@ -1071,10 +1071,33 @@ class AdministersController extends Controller
         return redirect()->route('admin.reviewList')->with('success', 'レビューが正常に' . ($isEdit ? '更新' : '登録') . 'されました。');
     }
 
-    public function reviewDetail(Request $request)
+    public function reviewDetail(Request $request, $id)
     {
-        //$review = ReviewRegist::indOrFail($id);
-        return view('admin.review_detail');
+        $review = ReviewRegist::with(['product', 'member'])->findOrFail($id);
+
+        // 商品に関連する全てのレビューを取得（評価の平均値も取得する）
+        $averageRating = ReviewRegist::where('product_id', $review->product_id)
+            ->avg('evaluation');
+        // 評価の平均値を切り上げして整数にする
+        $averageRating = ceil($averageRating);
+    
+        return view('admin.review_detail', compact('review', 'averageRating'));
     }
     
+    public function reviewDelete(Request $request)
+    {
+        $id = $request->input('id');
+    
+        try {
+            DB::transaction(function () use ($id) {
+                $review = ReviewRegist::findOrFail($id);
+                $review->delete(); // ソフトデリート
+            });
+    
+            return redirect()->route('admin.reviewList')->with('success', 'レビューが正常に削除されました。');
+        } catch (\Exception $e) {
+            \Log::error('Review deletion failed: ' . $e->getMessage());
+            return redirect()->route('admin.reviewDetail', ['id' => $id])->with('error', 'レビューの削除中にエラーが発生しました。');
+        }
+    }
 }

@@ -153,3 +153,4 @@ Route::post('/admin/review/confirm/{id?}', 'AdministersController@reviewConfirm'
 Route::post('/admin/review/complete/{id?}', 'AdministersController@reviewComp')->name('admin.reviewComp');
 
 Route::get('/admin/review/detail/{id?}', 'AdministersController@reviewDetail')->name('admin.reviewDetail');
+Route::post('/admin/review/delete', 'AdministersController@reviewDelete')->name('admin.reviewDelete');
