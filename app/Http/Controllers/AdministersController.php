@@ -305,11 +305,21 @@ class AdministersController extends Controller
         return redirect()->route('admin.showList');
     }
 
-    public function showDetail($id)
+    public function showDetail(Request $request, $id)
     {
         $user = Member::findOrFail($id);
+    
+        $redirectFrom = $request->input('redirect_from');
+        $productId = $request->input('product_id');
+    
+        // セッションに保存
+        $request->session()->flash('redirect_from', $redirectFrom);
+        $request->session()->flash('product_id', $productId);
+    
         return view('admin.detail', [
             'user' => $user,
+            'redirectFrom' => $redirectFrom,
+            'productId' => $productId,
         ]);
     }
 

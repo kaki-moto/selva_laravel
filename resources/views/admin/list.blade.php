@@ -114,7 +114,13 @@
             <tr>
                 <td>{{ $user->id }}</td>
                 <td>
-                    <a href="{{ route('admin.showDetail', ['id' => $user->id]) }}">{{ $user->name_sei }} {{ $user->name_mei }}</a>
+                    <a href="{{ route('admin.showDetail', ['id' => $user->id]) }}" onclick="event.preventDefault(); document.getElementById('redirect-form-{{ $user->id }}').submit();">
+                        {{ $user->name_sei }} {{ $user->name_mei }}
+                    </a>
+                    <form id="redirect-form-{{ $user->id }}" action="{{ route('admin.showDetail', ['id' => $user->id]) }}" method="GET" style="display: none;">
+                        @csrf
+                        <input type="hidden" name="redirect_from" value="list">
+                    </form>
                 </td>
                 <td>{{ $user->email }}</td>
                 <td>{{ $user->gender == 1 ? '男性' : '女性' }}</td>
@@ -123,7 +129,13 @@
                     <a href="{{ route('admin.showForm', ['id' => $user->id]) }}">編集</a>
                 </td>
                 <td>
-                    <a href="{{ route('admin.showDetail', ['id' => $user->id]) }}">詳細</a>
+                    <a href="{{ route('admin.showDetail', ['id' => $user->id]) }}" onclick="event.preventDefault(); document.getElementById('redirect-form-{{ $user->id }}').submit();">
+                        詳細
+                    </a>
+                    <form id="redirect-form-{{ $user->id }}" action="{{ route('admin.showDetail', ['id' => $user->id]) }}" method="GET" style="display: none;">
+                        @csrf
+                        <input type="hidden" name="redirect_from" value="list">
+                    </form>
                 </td>
             </tr>
             @endforeach

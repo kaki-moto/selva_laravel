@@ -8,9 +8,15 @@
 <body>
     <header>
         <h3>会員詳細</h3>
-        <form action="{{ route('admin.showList') }}" method="GET">
-            <button type="submit">一覧に戻る</button>
-        </form>
+        @if($redirectFrom == 'product_detail')
+            <form action="{{ route('admin.productDetail', ['id' => $productId]) }}" method="GET">
+                <button type="submit">商品詳細に戻る</button>
+            </form>
+        @else
+            <form action="{{ route('admin.showList') }}" method="GET">
+                <button type="submit">一覧に戻る</button>
+            </form>
+        @endif
     </header>
 
         <label>

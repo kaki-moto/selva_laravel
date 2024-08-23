@@ -100,7 +100,14 @@
                 <!--商品レビューID-->
                 <p>商品レビューID {{ $review->id }}</p>
                 <!--投稿者氏名-->
-                <a href="{{ route('admin.showDetail', ['id' => $product->member_id]) }}">{{ $review->member->nickname }}さん</a>
+                <a href="{{ route('admin.showDetail', ['id' => $review->member->id]) }}" onclick="event.preventDefault(); document.getElementById('redirect-form-{{ $review->id }}').submit();">
+                    {{ $review->member->nickname }}さん
+                </a>
+                <form id="redirect-form-{{ $review->id }}" action="{{ route('admin.showDetail', ['id' => $review->member->id]) }}" method="GET" style="display: none;">
+                    @csrf
+                    <input type="hidden" name="redirect_from" value="product_detail">
+                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                </form>
                 <!--★-->
                 <p>{{ str_repeat('★', $review->evaluation) }} {{ $review->evaluation }}</p>
                 <!--商品コメント-->
@@ -110,7 +117,7 @@
             <hr>
         @endforeach
     @else
-        <p>まだレビューがありません。</p>
+        <p>レビューはありません。</p>
     @endif
 
     <!--商品レビュー詳細ボタン-->
@@ -126,7 +133,7 @@
     @if ($totalReviews > 3)
     {{ $reviews->links('vendor.pagination.custom') }}
     @endif
-    
+
     </main>
 </body>
 </html>
