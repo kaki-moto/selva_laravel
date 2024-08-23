@@ -11,7 +11,7 @@
             <button type="submit">一覧に戻る</button>
     </form>
     
-    <form action="{{ route('admin.saveProduct') }}" method="post">
+    <form action="{{ route('admin.saveProduct') }}" id="productRegist" method="post">
         @csrf
 
         <input type="hidden" name="form_token" value="{{ $formToken }}">
@@ -66,7 +66,7 @@
         </label>
         <br>
 
-        <button type="submit">{{ $isEdit ? '更新完了' : '登録完了' }}</button>
+        <button type="submit" id="submitButton">{{ $isEdit ? '更新完了' : '登録完了' }}</button>
     </form>
 
     <form action="{{ route('admin.productForm', $isEdit ? ['id' => $product->id] : []) }}" method="get">
@@ -83,6 +83,12 @@
     <input type="hidden" name="from_confirm" value="1">
     <input type="submit" value="前に戻る">
     </form>
+
+<script>
+document.getElementById('productRegist').addEventListener('submit', function() {
+    document.getElementById('submitButton').disabled = true;
+});
+</script>
 
 </body>
 </html>

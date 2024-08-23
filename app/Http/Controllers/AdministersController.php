@@ -1018,7 +1018,7 @@ class AdministersController extends Controller
         } else {
             $review = new ReviewRegist($validatedData);
         }
-    
+
         $review->load('product', 'member');
 
         // 商品に関連する全てのレビューを取得（評価の平均値も取得する）
@@ -1050,11 +1050,22 @@ class AdministersController extends Controller
             'comment' => 'required|string|max:500',
         ]);
 
-        if ($isEdit) {
-            $review = ReviewRegist::findOrFail($id);
-            $review->update($validatedData);
-        } else {
-            $review = ReviewRegist::create($validatedData);
+        try {
+            DB::transaction(function () use ($isEdit, $id, $validatedData) {
+                if ($isEdit) {
+                    $review = ReviewRegist::findOrFail($id);
+                    $review->update($validatedData);
+                } else {
+                    ReviewRegist::create($validatedData);
+                }
+            });
+    
+            $message = $isEdit ? 'レビューが正常に更新されました。' : 'レビューが正常に登録されました。';
+            return redirect()->route('admin.reviewList')->with('success', $message);
+        } catch (\Exception $e) {
+            \Log::error('Review save failed: ' . $e->getMessage());
+            $errorMessage = $isEdit ? 'レビューの更新中にエラーが発生しました。' : 'レビューの登録中にエラーが発生しました。';
+            return redirect()->route('admin.reviewForm', $isEdit ? ['id' => $id] : [])->with('error', $errorMessage);
         }
 
         return redirect()->route('admin.reviewList')->with('success', 'レビューが正常に' . ($isEdit ? '更新' : '登録') . 'されました。');

@@ -17,8 +17,11 @@
     </header>
 
     <main>
-        <form action="{{ route('admin.reviewComp') }}" method="POST">
+        <form action="{{ route('admin.reviewComp') }}" id="reviewRegist" method="POST">
             @csrf
+            @if($isEdit)
+                <input type="hidden" name="id" value="{{ $review->id }}">
+            @endif
             <input type="hidden" name="product_id" value="{{ $review->product_id }}">
             <input type="hidden" name="member_id" value="{{ $review->member_id }}">
             <input type="hidden" name="evaluation" value="{{ $review->evaluation }}">
@@ -53,7 +56,7 @@
             <p>商品評価 {{ $review->evaluation }}</p>
             <p>商品コメント {{ $review->comment }}</p>
 
-            <button type="submit">{{ $isEdit ? '更新完了' : '登録完了' }}</button>
+            <button type="submit"  id="submitButton" >{{ $isEdit ? '更新完了' : '登録完了' }}</button>
         </form>
 
         <form action="{{ route('admin.reviewForm', $isEdit ? ['id' => $review->id] : []) }}" method="GET">
@@ -62,6 +65,12 @@
             @endif
             <button type="submit">前に戻る</button>
         </form>
+
+<script>
+document.getElementById('reviewRegist').addEventListener('submit', function() {
+    document.getElementById('submitButton').disabled = true;
+});
+</script>
     </main>
 </body>
 </html>
