@@ -142,3 +142,6 @@ Route::post('/admin/product/save', 'AdministersController@saveProduct')->name('a
 
 //小カテゴリ表示のため
 Route::get('/get-subcategories', 'AdministersController@getSubcategories')->name('get-subcategories');
+
+Route::get('/admin/product/detail/{id?}', 'AdministersController@productDetail')->name('admin.productDetail');
+Route::post('/admin/product/delete/{id?}', 'AdministersController@productDelete')->name('admin.productDelete');

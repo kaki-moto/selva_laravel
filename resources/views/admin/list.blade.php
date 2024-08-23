@@ -108,16 +108,22 @@
                     </a>
                 </th>
                 <th bgcolor="gray">編集</th>
+                <th bgcolor="gray">詳細</th>
             </tr>
             @foreach($users as $user)
             <tr>
                 <td>{{ $user->id }}</td>
-                <td>{{ $user->name_sei }} {{ $user->name_mei }}</td>
+                <td>
+                    <a href="{{ route('admin.showDetail', ['id' => $user->id]) }}">{{ $user->name_sei }} {{ $user->name_mei }}</a>
+                </td>
                 <td>{{ $user->email }}</td>
                 <td>{{ $user->gender == 1 ? '男性' : '女性' }}</td>
                 <td>{{ $user->created_at }}</td>
                 <td>
                     <a href="{{ route('admin.showForm', ['id' => $user->id]) }}">編集</a>
+                </td>
+                <td>
+                    <a href="{{ route('admin.showDetail', ['id' => $user->id]) }}">詳細</a>
                 </td>
             </tr>
             @endforeach

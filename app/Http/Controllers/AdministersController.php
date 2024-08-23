@@ -11,6 +11,7 @@ use App\Member;
 use App\ProductCategory;
 use App\ProductSubcategory;
 use App\Product;
+use App\ReviewRegist;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
@@ -864,4 +865,46 @@ class AdministersController extends Controller
         return response()->json($subCategories);
     }
 
+    public function productDetail(Request $request, $id)
+    {
+        $product = Product::with(['category', 'subcategory', 'member'])->findOrFail($id);
+
+        // 商品に関連する全てのレビューを取得（評価の平均値も取得する）
+        $averageRating = ReviewRegist::where('product_id', $id)
+        ->avg('evaluation');
+        // 評価の平均値を切り上げして整数にする
+        $averageRating = ceil($averageRating);
+
+        // レビューの総数を取得
+        $totalReviews = ReviewRegist::where('product_id', $id)->count();
+
+        // この商品に関連するレビューを取得し、1ページあたり3件ずつ表示
+        $reviews = ReviewRegist::where('product_id', $id)
+        ->with('member')  // 関連するメンバー情報も一緒に取得
+        ->paginate(3);
+        
+        return view('admin.product_detail', compact('product', 'averageRating', 'reviews', 'totalReviews'));
+    }
+
+    public function productDelete(Request $request, $id)
+    {
+        try {
+            DB::transaction(function () use ($id) {
+                $product = Product::findOrFail($id);
+                
+                // 関連するレビューをソフトデリート
+                $product->reviews()->delete();
+                
+                // 商品をソフトデリート
+                $product->delete();
+            });
+            
+            return redirect()->route('admin.productList')->with('success', '商品と関連するレビューが削除されました。');
+        } catch (\Exception $e) {
+            \Log::error('Product deletion failed: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());  // スタックトレースをログに記録
+            return redirect()->route('admin.productList')->with('error', '商品の削除中にエラーが発生しました。');
+        }
+    }
+    
 }

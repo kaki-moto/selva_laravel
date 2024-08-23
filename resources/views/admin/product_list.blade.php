@@ -53,7 +53,7 @@
     <header>
         <h3>商品一覧</h3>
         <form action="{{ route('admin.top') }}" method="GET">
-            <button type="submit">トップに戻る</button>
+            <button type="submit">トップへ戻る</button>
         </form>
     </header>
 
@@ -102,16 +102,20 @@
                     </a>
                 </th>
                 <th bgcolor="gray">編集</th>
+                <th bgcolor="gray">詳細</th>
             </tr>
             @foreach($products as $product)
             <tr>
                 <td>{{ $product->id }}</td>
                 <td>
-                    {{ $product->name }}
+                    <a href="{{ route('admin.productDetail', ['id' => $product->id]) }}">{{ $product->name }}</a>
                 </td>
                 <td>{{ $product->created_at }}</td>
                 <td>
                     <a href="{{ route('admin.productForm', ['id' => $product->id]) }}">編集</a>
+                </td>
+                <td>
+                    <a href="{{ route('admin.productDetail', ['id' => $product->id]) }}">詳細</a>
                 </td>
             </tr>
             @endforeach
