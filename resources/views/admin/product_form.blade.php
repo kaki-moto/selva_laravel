@@ -104,6 +104,7 @@
             @endif
         </div>
         <button type="button" class="upload-button" data-target="{{ $i }}">アップロード</button>
+        <div id="error-message-{{ $i }}" style="color: red;"></div>
         @error("image_{$i}")
             <div style="color: red;">{{ $message }}</div>
         @enderror
@@ -130,24 +131,87 @@
 
 <script>
 $(document).ready(function() {
-    
     const fileInputs = document.querySelectorAll('input[type="file"]');
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+    const maxFileSize = 10 * 1024 * 1024; // 10MB in bytes
 
     fileInputs.forEach(input => {
         input.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const extension = file.name.split('.').pop().toLowerCase();
-                if (!allowedExtensions.includes(extension)) {
-                    alert('許可されているファイル形式は jpg, jpeg, png, gif のみです。');
-                    this.value = '';
-                    return;
-                }
-            }
+            handleFileChange(this);
         });
     });
-    
+
+    function handleFileChange(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const extension = file.name.split('.').pop().toLowerCase();
+        const errorMessageId = 'error-message-' + input.name.slice(-1);
+        const errorMessageElement = document.getElementById(errorMessageId);
+        const previewContainerId = 'image-preview-' + input.name.slice(-1);
+
+        // Clear previous error messages and preview
+        errorMessageElement.textContent = '';
+        $('#' + previewContainerId).empty();
+
+        if (!allowedExtensions.includes(extension)) {
+            showError(errorMessageElement, '許可されているファイル形式は jpg, jpeg, png, gif のみです。');
+            input.value = ''; // Clear the file input
+            return;
+        }
+
+        if (file.size > maxFileSize) {
+            showError(errorMessageElement, 'ファイルサイズは10MB以下にしてください。');
+            input.value = ''; // Clear the file input
+            return;
+        }
+
+        // If all checks pass, proceed with file preview and upload
+        previewAndUploadFile(input, file, previewContainerId, errorMessageElement);
+    }
+
+    function showError(element, message) {
+        element.textContent = message;
+        element.style.display = 'block';
+    }
+
+    function previewAndUploadFile(input, file, previewContainerId, errorMessageElement) {
+        var formData = new FormData();
+        formData.append('product_image', file);
+
+        // Preview the image
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var img = $('<img>')
+                .addClass('image-preview')
+                .attr('src', e.target.result)
+                .css({'width': '200px', 'margin': '5px'});
+            $('#' + previewContainerId).append(img);
+        };
+        reader.readAsDataURL(file);
+
+        // Upload the image
+        $.ajax({
+            url: '{{ route("upload_images") }}',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                if (response.success) {
+                    console.log('画像が正常にアップロードされました');
+                } else {
+                    showError(errorMessageElement, 'エラー: ' + response.message);
+                    input.value = ''; // Clear the file input on error
+                }
+            },
+            error: function(xhr, status, error) {
+                showError(errorMessageElement, 'エラー: アップロード中にエラーが発生しました。');
+                input.value = ''; // Clear the file input on error
+            }
+        });
+    }
+
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -193,55 +257,21 @@ $(document).ready(function() {
         $('input[name="image_' + targetId + '"]').click();
     });
 
-    $('.product-image').change(function(e) {
-        var file = e.target.files[0];
-        var formData = new FormData();
-        var previewContainerId = 'image-preview-' + $(this).attr('name').slice(-1);
-
-        $('#' + previewContainerId).empty();
-        $('#error-message').empty();
-
-        if (!file) return;
-
-        if (!file.type.match('image/(jpg|jpeg|png|gif)')) {
-            $('#error-message').append('<p>エラー: ' + file.name + 'は許可されていないファイル形式です。</p>');
-            return;
-        }
-
-        if (file.size > 10 * 1024 * 1024) {
-            $('#error-message').append('<p>エラー: ' + file.name + 'は10MBを超えています。</p>');
-            return;
-        }
-
-        formData.append('product_image', file);
-
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            var img = $('<img>')
-                .addClass('image-preview')
-                .attr('src', e.target.result)
-                .css({'width': '200px', 'margin': '5px'});
-            $('#' + previewContainerId).append(img);
-        };
-        reader.readAsDataURL(file);
-
-        $.ajax({
-            url: '{{ route("upload_images") }}',
-            type: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function(response) {
-                if (response.success) {
-                    console.log('画像が正常にアップロードされました');
-                } else {
-                    $('#error-message').append('<p>エラー: ' + response.message + '</p>');
-                }
-            },
-            error: function(xhr, status, error) {
-                $('#error-message').append('<p>エラー: アップロード中にエラーが発生しました。</p>');
+    // Prevent form submission if there are any errors
+    $('#product-form').submit(function(e) {
+        const errorMessages = document.querySelectorAll('[id^="error-message-"]');
+        let hasError = false;
+        errorMessages.forEach(errorMessage => {
+            if (errorMessage.textContent !== '') {
+                hasError = true;
+                errorMessage.style.display = 'block'; // Ensure error message is visible
             }
         });
+        if (hasError) {
+            e.preventDefault();
+            alert('エラーを修正してから再度送信してください。');
+            return false;
+        }
     });
 });
 </script>
