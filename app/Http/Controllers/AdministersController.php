@@ -710,7 +710,17 @@ class AdministersController extends Controller
             'member_id' => 'required|exists:members,id',
             'name' => 'required|max:100',
             'product_category_id' => 'required|exists:product_categories,id',
-            'product_subcategory_id' => 'required|exists:product_subcategories,id',
+            'product_subcategory_id' => [
+                'required',
+                'exists:product_subcategories,id',
+                //選択された小カテゴリが実際に選択された大カテゴリに属しているかをチェック
+                function ($attribute, $value, $fail) use ($request) {
+                    $subcategory = ProductSubcategory::find($value);
+                    if (!$subcategory || $subcategory->product_category_id != $request->input('product_category_id')) {
+                        $fail('選択された小カテゴリが大カテゴリに属していません。');
+                    }
+                },
+            ],
             'product_content' => 'required|max:500',
         ];
 
@@ -719,11 +729,7 @@ class AdministersController extends Controller
             $imageKey = "image_{$i}";
             $existingImageKey = "existing_image_{$i}";
             
-            if ($isEdit) {
-                $rules[$imageKey] = 'nullable|image|max:10240|mimes:jpeg,png,jpg,gif';
-            } else {
-                $rules[$imageKey] = $i === 1 ? 'required_without:'.$existingImageKey.'|image|max:10240|mimes:jpeg,png,jpg,gif' : 'nullable|image|max:10240|mimes:jpeg,png,jpg,gif';
-            }
+            $rules[$imageKey] = 'nullable|image|max:10240|mimes:jpeg,png,jpg,gif';
         }
 
         $validator = Validator::make($request->all(), $rules); //バリデーションを実行。もし失敗した場合は、商品登録または編集フォームにリダイレクト。エラーメッセージと入力内容をリクエストに戻す。
@@ -1100,4 +1106,5 @@ class AdministersController extends Controller
             return redirect()->route('admin.reviewDetail', ['id' => $id])->with('error', 'レビューの削除中にエラーが発生しました。');
         }
     }
+    
 }
