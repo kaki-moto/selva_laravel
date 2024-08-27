@@ -66,7 +66,7 @@
         </label>
         <br>
 
-        <button type="submit" id="submitButton">{{ $isEdit ? '更新完了' : '登録完了' }}</button>
+        <button type="submit" id="submitButton">{{ $isEdit ? '編集完了' : '登録完了' }}</button>
     </form>
 
     <form action="{{ route('admin.productForm', $isEdit ? ['id' => $product->id] : []) }}" method="get">

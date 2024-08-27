@@ -56,7 +56,7 @@
             <p>商品評価 {{ $review->evaluation }}</p>
             <p>商品コメント {{ $review->comment }}</p>
 
-            <button type="submit"  id="submitButton" >{{ $isEdit ? '更新完了' : '登録完了' }}</button>
+            <button type="submit"  id="submitButton" >{{ $isEdit ? '編集完了' : '登録完了' }}</button>
         </form>
 
         <form action="{{ route('admin.reviewForm', $isEdit ? ['id' => $review->id] : []) }}" method="GET">

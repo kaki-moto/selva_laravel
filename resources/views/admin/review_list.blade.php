@@ -117,7 +117,9 @@
                     {{ $review->product_id }}
                 </td>
                 <td>{{ $review->evaluation }}</td>
-                <td>{{ $review->comment }}</td>
+                <td>
+                    <a href="{{ route('admin.reviewDetail', ['id' => $review->id]) }}">{{ $review->comment }}</a>
+                </td>
                 <td>{{ $review->created_at }}</td>
                 <td>
                     <a href="{{ route('admin.reviewForm', ['id' => $review->id]) }}">編集</a>
